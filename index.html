@@ -10,11 +10,9 @@
 
   <header class="site-header">
     <div class="header-inner">
-      <div class="header-brand">
-        <div class="header-titles">
-          <span class="header-title">Weather Decision Support Tool</span>
-          <span class="header-subtitle">Emergency Management — Decision Aid Only</span>
-        </div>
+      <div class="header-titles">
+        <span class="header-title">Weather Decision Support Tool</span>
+        <span class="header-subtitle">Emergency Management — Decision Aid Only</span>
       </div>
       <div class="header-meta" id="live-clock"></div>
     </div>
@@ -22,7 +20,7 @@
 
   <main class="main-content">
 
-    <!-- CONTEXT PANEL -->
+    <!-- ASSESSMENT CONTEXT -->
     <section class="card context-card">
       <h2 class="card-title">Assessment Context</h2>
       <div class="form-grid three-col">
@@ -53,10 +51,65 @@
         </div>
 
       </div>
+      <div class="form-grid two-col" style="margin-top:1rem;">
+        <div class="form-group">
+          <label for="assessor-name">Assessor Name <span class="optional">(optional — for export record)</span></label>
+          <input type="text" id="assessor-name" placeholder="e.g. Jane Smith, Emergency Management" />
+        </div>
+        <div class="form-group">
+          <label for="forecast-confidence">Forecast Confidence</label>
+          <select id="forecast-confidence">
+            <option value="high">High — Forecast is well-established</option>
+            <option value="moderate" selected>Moderate — Some uncertainty remains</option>
+            <option value="low">Low — Conditions may change significantly</option>
+          </select>
+          <span class="input-hint">Displayed in results and condition summary. Does not alter scores.</span>
+        </div>
+      </div>
+    </section>
 
-      <div class="form-group" style="margin-top:1rem;">
-        <label for="assessor-name">Assessor Name <span class="optional">(optional — for export record)</span></label>
-        <input type="text" id="assessor-name" placeholder="e.g. Jane Smith, Emergency Management" />
+    <!-- CAMPUS CONTEXT -->
+    <section class="card">
+      <h2 class="card-title">Campus Context</h2>
+      <p class="card-desc">Operational context that may affect how scores are interpreted. A scheduled major outdoor event increases the weight of crowd-exposure hazards in the Outdoor Exposure score.</p>
+      <div class="form-grid two-col">
+
+        <div class="form-group">
+          <label for="classes-in-session">Classes In Session?</label>
+          <select id="classes-in-session">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="residence-halls">Residence Halls Occupied?</label>
+          <select id="residence-halls">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="outdoor-event">Major Outdoor Event Scheduled?</label>
+          <select id="outdoor-event">
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="attendance">Estimated Attendance</label>
+          <select id="attendance">
+            <option value="0">N/A — no outdoor event</option>
+            <option value="1">Fewer than 100</option>
+            <option value="2">100 – 1,000</option>
+            <option value="3">1,000 – 5,000</option>
+            <option value="4">5,000+</option>
+          </select>
+          <span class="input-hint">Only applies when a major outdoor event is scheduled.</span>
+        </div>
+
       </div>
     </section>
 
@@ -64,18 +117,12 @@
     <section class="card">
       <h2 class="card-title">Severe Weather Threat</h2>
       <p class="card-desc">
-        The National Weather Service provides the most reliable and up-to-date severe weather guidance for our region.
-        For Payne County, refer to the 
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> office.
-        For Tulsa and Cherokee Counties, refer to the 
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> office.
+        Check active alerts for the selected county at the NWS office serving that area.
+        Payne County falls under the <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman office</a>.
+        Tulsa and Cherokee counties fall under the <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa office</a>.
+        Severe weather outlooks and tornado threat assessments are available from the
+        <a href="https://www.spc.noaa.gov" target="_blank">Storm Prediction Center</a>.
       </p>
-      <p class="card-desc">
-        These pages offer real-time watches, warnings, radar, and decision-support information to help you evaluate storm threats and plan appropriate actions.
-      </p>
-
-      </p>
-
       <div class="form-grid two-col">
 
         <div class="form-group">
@@ -120,20 +167,42 @@
       </div>
     </section>
 
+    <!-- FLOOD HAZARDS -->
+    <section class="card">
+      <h2 class="card-title">Flood Hazards</h2>
+      <p class="card-desc">
+        Flash flood watches and warnings are issued by the
+        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> and
+        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> offices respectively.
+        The <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> provides real-time
+        rainfall accumulation data. Flooding directly affects both the Campus Operations and Road &amp; Travel scores.
+      </p>
+      <div class="form-grid two-col">
+
+        <div class="form-group">
+          <label for="flood-level">Flood Threat Level</label>
+          <select id="flood-level">
+            <option value="0">None</option>
+            <option value="1">Localized nuisance flooding possible</option>
+            <option value="2">Flash Flood Watch</option>
+            <option value="3">Flash Flood Warning</option>
+          </select>
+        </div>
+
+      </div>
+    </section>
+
     <!-- WINTER HAZARDS -->
     <section class="card">
       <h2 class="card-title">Winter Hazards</h2>
       <p class="card-desc">
-        Winter weather impacts can vary across Oklahoma, so it’s important to use trusted local sources.
-        For Payne County, consult the 
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> winter weather guidance.
-        For Tulsa and Cherokee Counties, use the 
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> winter hazard information.
+        Ice accumulation and wind chill forecasts are available from the
+        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> or
+        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> area forecast.
+        The <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> provides real-time
+        observed temperatures, wind speeds, and precipitation data from stations across the state.
+        Road condition observations from Facilities Management or University Police can supplement forecast data.
       </p>
-      <p class="card-desc">
-        The <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> also provides high-resolution temperature, wind, and precipitation data that can help assess freezing conditions, road impacts, and cold-weather risks.
-      </p>
-
       <div class="form-grid three-col">
 
         <div class="form-group">
@@ -171,8 +240,9 @@
           <select id="precip-type">
             <option value="0">None or rain only</option>
             <option value="1">Rain + gusty wind</option>
-            <option value="2">Freezing rain</option>
-            <option value="3">Sleet / ice mix</option>
+            <option value="2">Freezing drizzle</option>
+            <option value="3">Freezing rain</option>
+            <option value="4">Sleet / ice mix</option>
           </select>
         </div>
 
@@ -192,15 +262,13 @@
     <section class="card">
       <h2 class="card-title">Heat Hazards</h2>
       <p class="card-desc">
-        Heat-related risks can escalate quickly, especially during prolonged warm periods.
-        For official heat safety guidance and local decision-support tools, use the 
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> resources for Payne County and the 
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> resources for Tulsa and Cherokee Counties.
+        Heat index forecasts are available from the
+        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> or
+        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> area forecast pages.
+        Both offices publish heat-related decision support information during summer months.
+        Wet Bulb Globe Temperature (WBGT) is a more accurate heat stress measure for outdoor activity
+        and is available through Perry Weather for Payne County. If WBGT is entered, it overrides Heat Index in the calculation.
       </p>
-      <p class="card-desc">
-        These pages include heat advisories, forecast heat index values, and recommended protective actions.
-      </p>
-
       <div class="form-grid two-col">
 
         <div class="form-group">
@@ -222,7 +290,7 @@
             <option value="2">85°F – 90°F (High risk)</option>
             <option value="3">Above 90°F (Extreme risk)</option>
           </select>
-          <span class="input-hint">Available from Perry Weather. Preferred over Heat Index when available.</span>
+          <span class="input-hint">Available from Perry Weather (Payne County only). Preferred over Heat Index when available.</span>
         </div>
 
       </div>
@@ -233,11 +301,11 @@
       <h2 class="card-title">Wind Conditions</h2>
       <p class="card-desc">
         Sustained wind and gust forecasts are available from the
-        <a href="https://forecast.weather.gov" target="_blank">NWS area forecast</a> and
+        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> or
+        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> area forecast and
         <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> current observations.
-        High Wind Warnings and Wind Advisories will appear in the NWS alert feed.
+        High Wind Warnings and Wind Advisories appear in the NWS active alert feed.
       </p>
-
       <div class="form-grid two-col">
 
         <div class="form-group">
@@ -267,14 +335,13 @@
     <section class="card">
       <h2 class="card-title">Road &amp; Travel Conditions</h2>
       <p class="card-desc">
-        Road conditions can change rapidly during severe weather, winter events, or flooding.
-        For statewide and regional road impacts, closures, and hazard mapping, use the Oklahoma road conditions dashboard:
-        <a href="https://experience.arcgis.com/experience/dbfe5818150b4ab0ab9d67f997026710" target="_blank">Oklahoma Road Conditions Map</a>
-        </p>
-      <p class="card-desc">
-        For campus-specific or local updates, Facilities Management or University Police may provide the most current information.
+        Current road conditions for Oklahoma are available at
+        <a href="https://www.511.oklahoma.gov" target="_blank">511.oklahoma.gov</a>.
+        ODOT travel advisories and warnings are issued through the
+        <a href="https://www.odot.org" target="_blank">Oklahoma Department of Transportation</a>.
+        Campus walkway and parking lot conditions should be confirmed with Facilities Management
+        or University Police when available.
       </p>
-
       <div class="form-grid two-col">
 
         <div class="form-group">
@@ -309,11 +376,12 @@
         </div>
 
         <div class="form-group">
-          <label for="visibility">Visibility / Fog</label>
+          <label for="visibility">Visibility</label>
           <select id="visibility">
             <option value="0">Normal</option>
-            <option value="1">Reduced — Dense Fog Advisory</option>
-            <option value="2">Near zero — Dense Fog Warning</option>
+            <option value="1">Reduced — under 1 mile</option>
+            <option value="2">Poor — under ¼ mile</option>
+            <option value="3">Near-zero</option>
           </select>
         </div>
 
@@ -342,10 +410,10 @@
       <div class="results-header">
         <h2>Assessment Results</h2>
         <div id="results-context-line" class="results-context-line"></div>
+        <div id="confidence-badge" class="confidence-badge"></div>
       </div>
 
       <div class="score-cards-row">
-
         <div class="score-card" id="score-card-ops">
           <div class="score-label">Campus Operations</div>
           <div class="stoplight-dot" id="dot-ops"></div>
@@ -353,7 +421,6 @@
           <div class="score-number" id="number-ops"></div>
           <div class="score-description" id="desc-ops"></div>
         </div>
-
         <div class="score-card" id="score-card-outdoor">
           <div class="score-label">Outdoor Exposure</div>
           <div class="stoplight-dot" id="dot-outdoor"></div>
@@ -361,7 +428,6 @@
           <div class="score-number" id="number-outdoor"></div>
           <div class="score-description" id="desc-outdoor"></div>
         </div>
-
         <div class="score-card" id="score-card-travel">
           <div class="score-label">Road &amp; Travel</div>
           <div class="stoplight-dot" id="dot-travel"></div>
@@ -369,7 +435,6 @@
           <div class="score-number" id="number-travel"></div>
           <div class="score-description" id="desc-travel"></div>
         </div>
-
       </div>
 
       <div class="condition-summary-wrapper">
