@@ -8,26 +8,35 @@
 </head>
 <body>
 
-  <header class="site-header">
+  <header class="site-header" role="banner">
     <div class="header-inner">
       <div class="header-titles">
         <span class="header-title">Weather Decision Support Tool</span>
         <span class="header-subtitle">Emergency Management — Decision Aid Only</span>
       </div>
-      <div class="header-meta" id="live-clock"></div>
+      <!-- aria-live so screen readers announce clock updates quietly -->
+      <div class="header-meta" id="live-clock" aria-live="off" aria-label="Current date and time"></div>
     </div>
   </header>
 
-  <main class="main-content">
+  <main class="main-content" id="main-content">
 
-    <!-- ASSESSMENT CONTEXT -->
-    <section class="card context-card">
-      <h2 class="card-title">Assessment Context</h2>
+    <!-- Skip link — lets keyboard users jump past the form directly to results -->
+    <a href="#results-panel" class="skip-link" id="skip-to-results" style="display:none;">Skip to results</a>
+
+    <!-- ── ASSESSMENT CONTEXT ──────────────────────────── -->
+    <!--
+      fieldset + legend replaces section + h2 for form groups.
+      This gives screen readers the group name when navigating
+      by form control, not just when reading headings.
+    -->
+    <fieldset class="card context-card">
+      <legend class="card-title">Assessment Context</legend>
       <div class="form-grid three-col">
 
         <div class="form-group">
           <label for="county">County</label>
-          <select id="county">
+          <select id="county" aria-required="true">
             <option value="">— Select county —</option>
             <option value="payne">Payne County</option>
             <option value="tulsa">Tulsa County</option>
@@ -37,7 +46,7 @@
 
         <div class="form-group">
           <label for="assessment-date">Date of Assessment</label>
-          <input type="date" id="assessment-date" />
+          <input type="date" id="assessment-date" aria-required="true" />
         </div>
 
         <div class="form-group">
@@ -53,26 +62,35 @@
       </div>
       <div class="form-grid two-col" style="margin-top:1rem;">
         <div class="form-group">
-          <label for="assessor-name">Assessor Name <span class="optional">(optional — for export record)</span></label>
-          <input type="text" id="assessor-name" placeholder="e.g. Jane Smith, Emergency Management" />
+          <label for="assessor-name">
+            Assessor Name
+            <span class="optional" aria-label="optional, used for export record">(optional — for export record)</span>
+          </label>
+          <input type="text" id="assessor-name"
+            placeholder="e.g. Jane Smith, Emergency Management"
+            autocomplete="name" />
         </div>
         <div class="form-group">
           <label for="forecast-confidence">Forecast Confidence</label>
-          <select id="forecast-confidence">
+          <select id="forecast-confidence" aria-describedby="confidence-hint">
             <option value="high">High — Forecast is well-established</option>
             <option value="moderate" selected>Moderate — Some uncertainty remains</option>
             <option value="low">Low — Conditions may change significantly</option>
           </select>
-          <span class="input-hint">Displayed in results and condition summary. Does not alter scores.</span>
+          <span class="input-hint" id="confidence-hint">Displayed in results and condition summary. Does not alter scores.</span>
         </div>
       </div>
-    </section>
+    </fieldset>
 
-    <!-- CAMPUS CONTEXT -->
-    <section class="card">
-      <h2 class="card-title">Campus Context</h2>
-      <p class="card-desc">Operational context that may affect how scores are interpreted. A scheduled major outdoor event increases the weight of crowd-exposure hazards in the Outdoor Exposure score.</p>
-      <div class="form-grid two-col">
+    <!-- ── CAMPUS CONTEXT ──────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Campus Context</legend>
+      <p class="card-desc" id="campus-context-desc">
+        Operational context that may affect how scores are interpreted.
+        A scheduled major outdoor event increases the weight of crowd-exposure
+        hazards in the Outdoor Exposure score.
+      </p>
+      <div class="form-grid two-col" aria-describedby="campus-context-desc">
 
         <div class="form-group">
           <label for="classes-in-session">Classes In Session?</label>
@@ -92,38 +110,44 @@
 
         <div class="form-group">
           <label for="outdoor-event">Major Outdoor Event Scheduled?</label>
-          <select id="outdoor-event">
+          <select id="outdoor-event" aria-controls="attendance-group"
+            aria-describedby="event-modifier-hint">
             <option value="0">No</option>
             <option value="1">Yes</option>
           </select>
+          <span class="input-hint" id="event-modifier-hint">
+            Selecting Yes adjusts Outdoor Exposure score weights based on crowd exposure risk.
+          </span>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" id="attendance-group">
           <label for="attendance">Estimated Attendance</label>
-          <select id="attendance">
+          <select id="attendance" aria-describedby="attendance-hint">
             <option value="0">N/A — no outdoor event</option>
             <option value="1">Fewer than 100</option>
             <option value="2">100 – 1,000</option>
             <option value="3">1,000 – 5,000</option>
             <option value="4">5,000+</option>
           </select>
-          <span class="input-hint">Only applies when a major outdoor event is scheduled.</span>
+          <span class="input-hint" id="attendance-hint">Only applies when a major outdoor event is scheduled.</span>
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- SEVERE WEATHER -->
-    <section class="card">
-      <h2 class="card-title">Severe Weather Threat</h2>
-      <p class="card-desc">
+    <!-- ── SEVERE WEATHER ──────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Severe Weather Threat</legend>
+      <p class="card-desc" id="severe-desc">
         Check active alerts for the selected county at the NWS office serving that area.
-        Payne County falls under the <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman office</a>.
-        Tulsa and Cherokee counties fall under the <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa office</a>.
+        Payne County falls under the
+        <a href="https://www.weather.gov/oun/" target="_blank" rel="noopener noreferrer">NWS Norman office</a>.
+        Tulsa and Cherokee counties fall under the
+        <a href="https://www.weather.gov/tsa/" target="_blank" rel="noopener noreferrer">NWS Tulsa office</a>.
         Severe weather outlooks and tornado threat assessments are available from the
-        <a href="https://www.spc.noaa.gov" target="_blank">Storm Prediction Center</a>.
+        <a href="https://www.spc.noaa.gov" target="_blank" rel="noopener noreferrer">Storm Prediction Center</a>.
       </p>
-      <div class="form-grid two-col">
+      <div class="form-grid two-col" aria-describedby="severe-desc">
 
         <div class="form-group">
           <label for="nws-alert">Highest Active NWS Alert Level</label>
@@ -148,11 +172,13 @@
 
         <div class="form-group">
           <label for="lightning">Active Lightning Warning Nearby?</label>
-          <select id="lightning">
+          <select id="lightning" aria-describedby="lightning-hint">
             <option value="0">No</option>
             <option value="1">Yes — within 8 miles (Perry Weather or flash-to-bang &lt;30 sec)</option>
           </select>
-          <span class="input-hint">Active lightning within 8 miles forces Outdoor Exposure to Red regardless of other scores.</span>
+          <span class="input-hint" id="lightning-hint">
+            Active lightning within 8 miles forces Outdoor Exposure to Red regardless of other scores.
+          </span>
         </div>
 
         <div class="form-group">
@@ -165,19 +191,20 @@
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- FLOOD HAZARDS -->
-    <section class="card">
-      <h2 class="card-title">Flood Hazards</h2>
-      <p class="card-desc">
+    <!-- ── FLOOD HAZARDS ───────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Flood Hazards</legend>
+      <p class="card-desc" id="flood-desc">
         Flash flood watches and warnings are issued by the
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> and
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> offices respectively.
-        The <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> provides real-time
-        rainfall accumulation data. Flooding directly affects both the Campus Operations and Road &amp; Travel scores.
+        <a href="https://www.weather.gov/oun/" target="_blank" rel="noopener noreferrer">NWS Norman</a> and
+        <a href="https://www.weather.gov/tsa/" target="_blank" rel="noopener noreferrer">NWS Tulsa</a> offices.
+        The <a href="https://www.mesonet.org" target="_blank" rel="noopener noreferrer">Oklahoma Mesonet</a>
+        provides real-time rainfall accumulation data. Flooding directly affects both the Campus Operations
+        and Road &amp; Travel scores.
       </p>
-      <div class="form-grid two-col">
+      <div class="form-grid two-col" aria-describedby="flood-desc">
 
         <div class="form-group">
           <label for="flood-level">Flood Threat Level</label>
@@ -190,20 +217,20 @@
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- WINTER HAZARDS -->
-    <section class="card">
-      <h2 class="card-title">Winter Hazards</h2>
-      <p class="card-desc">
+    <!-- ── WINTER HAZARDS ──────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Winter Hazards</legend>
+      <p class="card-desc" id="winter-desc">
         Ice accumulation and wind chill forecasts are available from the
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> or
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> area forecast.
-        The <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> provides real-time
-        observed temperatures, wind speeds, and precipitation data from stations across the state.
+        <a href="https://www.weather.gov/oun/" target="_blank" rel="noopener noreferrer">NWS Norman</a> or
+        <a href="https://www.weather.gov/tsa/" target="_blank" rel="noopener noreferrer">NWS Tulsa</a> area forecast.
+        The <a href="https://www.mesonet.org" target="_blank" rel="noopener noreferrer">Oklahoma Mesonet</a>
+        provides real-time observed temperatures, wind speeds, and precipitation data from stations across the state.
         Road condition observations from Facilities Management or University Police can supplement forecast data.
       </p>
-      <div class="form-grid three-col">
+      <div class="form-grid three-col" aria-describedby="winter-desc">
 
         <div class="form-group">
           <label for="ice-accum">Ice Accumulation Forecast</label>
@@ -248,28 +275,28 @@
 
         <div class="form-group">
           <label for="freeze-thaw">Freeze-Thaw Cycle?</label>
-          <select id="freeze-thaw">
+          <select id="freeze-thaw" aria-describedby="freeze-thaw-hint">
             <option value="0">No</option>
             <option value="1">Yes — temps crossing 32°F, black ice risk</option>
           </select>
-          <span class="input-hint">Particularly dangerous in morning hours on untreated surfaces.</span>
+          <span class="input-hint" id="freeze-thaw-hint">Particularly dangerous in morning hours on untreated surfaces.</span>
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- HEAT HAZARDS -->
-    <section class="card">
-      <h2 class="card-title">Heat Hazards</h2>
-      <p class="card-desc">
+    <!-- ── HEAT HAZARDS ────────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Heat Hazards</legend>
+      <p class="card-desc" id="heat-desc">
         Heat index forecasts are available from the
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> or
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> area forecast pages.
+        <a href="https://www.weather.gov/oun/" target="_blank" rel="noopener noreferrer">NWS Norman</a> or
+        <a href="https://www.weather.gov/tsa/" target="_blank" rel="noopener noreferrer">NWS Tulsa</a> area forecast pages.
         Both offices publish heat-related decision support information during summer months.
         Wet Bulb Globe Temperature (WBGT) is a more accurate heat stress measure for outdoor activity
         and is available through Perry Weather for Payne County. If WBGT is entered, it overrides Heat Index in the calculation.
       </p>
-      <div class="form-grid two-col">
+      <div class="form-grid two-col" aria-describedby="heat-desc">
 
         <div class="form-group">
           <label for="heat-index">Heat Index Forecast (high)</label>
@@ -283,30 +310,30 @@
 
         <div class="form-group">
           <label for="wbgt">Wet Bulb Globe Temperature — WBGT</label>
-          <select id="wbgt">
+          <select id="wbgt" aria-describedby="wbgt-hint">
             <option value="-1">Not available — use Heat Index above</option>
             <option value="0">Below 80°F</option>
             <option value="1">80°F – 85°F (Moderate risk)</option>
             <option value="2">85°F – 90°F (High risk)</option>
             <option value="3">Above 90°F (Extreme risk)</option>
           </select>
-          <span class="input-hint">Available from Perry Weather (Payne County only). Preferred over Heat Index when available.</span>
+          <span class="input-hint" id="wbgt-hint">Available from Perry Weather (Payne County only). Preferred over Heat Index when available.</span>
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- WIND -->
-    <section class="card">
-      <h2 class="card-title">Wind Conditions</h2>
-      <p class="card-desc">
+    <!-- ── WIND CONDITIONS ────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Wind Conditions</legend>
+      <p class="card-desc" id="wind-desc">
         Sustained wind and gust forecasts are available from the
-        <a href="https://www.weather.gov/oun/" target="_blank">NWS Norman</a> or
-        <a href="https://www.weather.gov/tsa/" target="_blank">NWS Tulsa</a> area forecast and
-        <a href="https://www.mesonet.org" target="_blank">Oklahoma Mesonet</a> current observations.
+        <a href="https://www.weather.gov/oun/" target="_blank" rel="noopener noreferrer">NWS Norman</a> or
+        <a href="https://www.weather.gov/tsa/" target="_blank" rel="noopener noreferrer">NWS Tulsa</a> area forecast and
+        <a href="https://www.mesonet.org" target="_blank" rel="noopener noreferrer">Oklahoma Mesonet</a> current observations.
         High Wind Warnings and Wind Advisories appear in the NWS active alert feed.
       </p>
-      <div class="form-grid two-col">
+      <div class="form-grid two-col" aria-describedby="wind-desc">
 
         <div class="form-group">
           <label for="wind-speed">Sustained Wind Forecast</label>
@@ -329,20 +356,20 @@
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- ROAD & TRAVEL -->
-    <section class="card">
-      <h2 class="card-title">Road &amp; Travel Conditions</h2>
-      <p class="card-desc">
+    <!-- ── ROAD & TRAVEL ───────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Road &amp; Travel Conditions</legend>
+      <p class="card-desc" id="travel-desc">
         Current road conditions for Oklahoma are available at
-        <a href="https://www.511.oklahoma.gov" target="_blank">511.oklahoma.gov</a>.
+        <a href="https://www.511.oklahoma.gov" target="_blank" rel="noopener noreferrer">511.oklahoma.gov</a>.
         ODOT travel advisories and warnings are issued through the
-        <a href="https://www.odot.org" target="_blank">Oklahoma Department of Transportation</a>.
+        <a href="https://www.odot.org" target="_blank" rel="noopener noreferrer">Oklahoma Department of Transportation</a>.
         Campus walkway and parking lot conditions should be confirmed with Facilities Management
         or University Police when available.
       </p>
-      <div class="form-grid two-col">
+      <div class="form-grid two-col" aria-describedby="travel-desc">
 
         <div class="form-group">
           <label for="road-conditions">Road Conditions (primary routes)</label>
@@ -366,13 +393,13 @@
 
         <div class="form-group">
           <label for="campus-walkways">Campus Walkway / Parking Condition</label>
-          <select id="campus-walkways">
+          <select id="campus-walkways" aria-describedby="walkways-hint">
             <option value="0">Clear</option>
             <option value="1">Wet or muddy</option>
             <option value="2">Icy patches reported</option>
             <option value="3">Widespread ice — fall risk significant</option>
           </select>
-          <span class="input-hint">Based on Facilities Management or University Police ground assessment.</span>
+          <span class="input-hint" id="walkways-hint">Based on Facilities Management or University Police ground assessment.</span>
         </div>
 
         <div class="form-group">
@@ -386,68 +413,113 @@
         </div>
 
       </div>
-    </section>
+    </fieldset>
 
-    <!-- NOTES -->
-    <section class="card">
-      <h2 class="card-title">Additional Notes</h2>
+    <!-- ── NOTES ───────────────────────────────────────── -->
+    <fieldset class="card">
+      <legend class="card-title">Additional Notes</legend>
       <div class="form-group">
-        <label for="notes">Contextual notes for this assessment <span class="optional">(optional)</span></label>
-        <textarea id="notes" rows="3" placeholder="e.g. NWS forecast discussion mentions rapid deterioration after 3 PM. Facilities reports parking lots already pre-treated."></textarea>
+        <label for="notes">
+          Contextual notes for this assessment
+          <span class="optional" aria-label="optional">(optional)</span>
+        </label>
+        <textarea id="notes" rows="3"
+          placeholder="e.g. NWS forecast discussion mentions rapid deterioration after 3 PM. Facilities reports parking lots already pre-treated."
+          aria-describedby="notes-hint"></textarea>
+        <span class="input-hint" id="notes-hint">These notes are included in the exported PDF record.</span>
       </div>
-    </section>
+    </fieldset>
 
-    <!-- CALCULATE -->
+    <!-- ── CALCULATE ────────────────────────────────────── -->
     <div class="action-row">
       <button class="btn-calculate" id="calculate-btn" onclick="calculateScores()">
         Calculate Risk Assessment
       </button>
     </div>
 
-    <!-- RESULTS PANEL -->
-    <section class="results-panel" id="results-panel" style="display:none;">
+    <!-- ── RESULTS PANEL ───────────────────────────────── -->
+    <!--
+      role="region" + aria-label makes this a named landmark.
+      aria-live="polite" announces to screen readers when content
+      updates after calculation without interrupting current speech.
+      tabindex="-1" allows JavaScript to programmatically focus this
+      element so keyboard users land here after hitting Calculate.
+    -->
+    <section class="results-panel" id="results-panel"
+      role="region"
+      aria-label="Assessment Results"
+      aria-live="polite"
+      tabindex="-1"
+      style="display:none;">
 
       <div class="results-header">
-        <h2>Assessment Results</h2>
+        <h2 id="results-heading">Assessment Results</h2>
         <div id="results-context-line" class="results-context-line"></div>
-        <div id="confidence-badge" class="confidence-badge"></div>
+        <div id="confidence-badge" class="confidence-badge" aria-live="polite"></div>
       </div>
 
-      <div class="score-cards-row">
-        <div class="score-card" id="score-card-ops">
-          <div class="score-label">Campus Operations</div>
-          <div class="stoplight-dot" id="dot-ops"></div>
+      <div class="score-cards-row" role="list" aria-label="Risk scores">
+
+        <!--
+          Each card is a list item with an aria-label combining the
+          category name, numeric score, and status level so screen
+          readers announce all three in one pass.
+          The stoplight dot is aria-hidden — it's purely visual;
+          the status text conveys the same information.
+        -->
+        <div class="score-card" id="score-card-ops" role="listitem">
+          <div class="score-label" aria-hidden="true">Campus Operations</div>
+          <div class="stoplight-dot" id="dot-ops" aria-hidden="true"></div>
           <div class="score-status" id="status-ops"></div>
           <div class="score-number" id="number-ops"></div>
           <div class="score-description" id="desc-ops"></div>
+          <!-- Hidden full label for screen readers -->
+          <span class="sr-only" id="ops-sr-label"></span>
         </div>
-        <div class="score-card" id="score-card-outdoor">
-          <div class="score-label">Outdoor Exposure</div>
-          <div class="stoplight-dot" id="dot-outdoor"></div>
+
+        <div class="score-card" id="score-card-outdoor" role="listitem">
+          <div class="score-label" aria-hidden="true">Outdoor Exposure</div>
+          <div class="stoplight-dot" id="dot-outdoor" aria-hidden="true"></div>
           <div class="score-status" id="status-outdoor"></div>
           <div class="score-number" id="number-outdoor"></div>
           <div class="score-description" id="desc-outdoor"></div>
+          <span class="sr-only" id="outdoor-sr-label"></span>
         </div>
-        <div class="score-card" id="score-card-travel">
-          <div class="score-label">Road &amp; Travel</div>
-          <div class="stoplight-dot" id="dot-travel"></div>
+
+        <div class="score-card" id="score-card-travel" role="listitem">
+          <div class="score-label" aria-hidden="true">Road &amp; Travel</div>
+          <div class="stoplight-dot" id="dot-travel" aria-hidden="true"></div>
           <div class="score-status" id="status-travel"></div>
           <div class="score-number" id="number-travel"></div>
           <div class="score-description" id="desc-travel"></div>
+          <span class="sr-only" id="travel-sr-label"></span>
         </div>
+
       </div>
 
+      <!--
+        aria-expanded reflects open/closed state of the summary panel.
+        aria-controls links the button to the element it controls.
+      -->
       <div class="condition-summary-wrapper">
-        <button class="summary-toggle" id="summary-toggle" onclick="toggleSummary()">
+        <button class="summary-toggle" id="summary-toggle"
+          aria-expanded="false"
+          aria-controls="condition-summary"
+          onclick="toggleSummary()">
           + View Condition Summary
         </button>
-        <div class="condition-summary" id="condition-summary" style="display:none;">
-          <ul id="condition-list"></ul>
+        <div class="condition-summary" id="condition-summary"
+          role="region"
+          aria-label="Condition Summary"
+          style="display:none;">
+          <ul id="condition-list" aria-label="Weather condition details"></ul>
         </div>
       </div>
 
-      <div class="disclaimer">
-        <strong>Decision Aid Only.</strong> This tool provides risk scoring to support — not replace — human judgment. Final decisions regarding campus operations and outdoor activities remain with authorized university leadership. All inputs and outputs should be documented as part of the decision record.
+      <div class="disclaimer" role="note">
+        <strong>Decision Aid Only.</strong> This tool provides risk scoring to support — not replace — human judgment.
+        Final decisions regarding campus operations and outdoor activities remain with authorized university leadership.
+        All inputs and outputs should be documented as part of the decision record.
       </div>
 
       <div class="action-row">
@@ -459,8 +531,9 @@
 
   </main>
 
-  <footer class="site-footer">
-    <p>Office of Emergency Management &nbsp;|&nbsp; Weather Decision Support Tool &nbsp;|&nbsp; <strong>For internal decision support use only</strong></p>
+  <footer class="site-footer" role="contentinfo">
+    <p>Office of Emergency Management &nbsp;|&nbsp; Weather Decision Support Tool &nbsp;|&nbsp;
+    <strong>For internal decision support use only</strong></p>
   </footer>
 
   <script src="script.js"></script>

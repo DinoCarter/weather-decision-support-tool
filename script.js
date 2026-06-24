@@ -499,18 +499,36 @@ function renderResults(opsScore, outdoorScore, travelScore, conditions, opsOverr
     ul.appendChild(li);
   });
 
+  // Reveal the skip-to-results link now that results exist
+  const skipLink = document.getElementById('skip-to-results');
+  if (skipLink) skipLink.style.display = 'inline';
+
   const panel = document.getElementById('results-panel');
   panel.style.display = 'flex';
-  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Move keyboard focus to results panel so keyboard and screen reader
+  // users land here after calculating without tabbing through the whole form.
+  // setTimeout gives the browser a tick to finish rendering first.
+  setTimeout(() => {
+    panel.focus();
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
 }
 
 function setScoreCard(id, score, levelObj, description, overrideText) {
-  document.getElementById(`dot-${id}`).className     = `stoplight-dot ${levelObj.level}`;
-  document.getElementById(`status-${id}`).className  = `score-status ${levelObj.level}`;
+  const categoryNames = { ops: 'Campus Operations', outdoor: 'Outdoor Exposure', travel: 'Road and Travel' };
+  document.getElementById(`dot-${id}`).className      = `stoplight-dot ${levelObj.level}`;
+  document.getElementById(`status-${id}`).className   = `score-status ${levelObj.level}`;
   document.getElementById(`status-${id}`).textContent = levelObj.label;
-  document.getElementById(`number-${id}`).textContent = overrideText ? 'Override' : `Score: ${score}/100`;
+  document.getElementById(`number-${id}`).textContent = overrideText ? 'Override active' : `Score: ${score} out of 100`;
   document.getElementById(`desc-${id}`).textContent   = overrideText || description;
   document.getElementById(`score-card-${id}`).className = `score-card ${levelObj.level}`;
+  const srEl = document.getElementById(`${id}-sr-label`);
+  if (srEl) {
+    srEl.textContent = overrideText
+      ? `${categoryNames[id]}: ${levelObj.label}. ${overrideText}`
+      : `${categoryNames[id]}: ${levelObj.label}. Score ${score} out of 100. ${description}`;
+  }
 }
 
 // ── TOGGLE SUMMARY ───────────────────────────────────────────
@@ -520,6 +538,7 @@ function toggleSummary() {
   const isHidden = summary.style.display === 'none';
   summary.style.display = isHidden ? 'block' : 'none';
   btn.textContent = isHidden ? '- Hide Condition Summary' : '+ View Condition Summary';
+  btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
   if (isHidden) summary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -544,13 +563,19 @@ function getWindowLabel() {
 
 // ── RESET ────────────────────────────────────────────────────
 function resetForm() {
-  document.getElementById('results-panel').style.display  = 'none';
-  document.getElementById('condition-summary').style.display = 'none';
-  document.getElementById('summary-toggle').textContent   = '+ View Condition Summary';
+  document.getElementById('results-panel').style.display     = 'none';
+  document.getElementById('condition-summary').style.display  = 'none';
+  const toggleBtn = document.getElementById('summary-toggle');
+  toggleBtn.textContent = '+ View Condition Summary';
+  toggleBtn.setAttribute('aria-expanded', 'false');
+  const skipLink = document.getElementById('skip-to-results');
+  if (skipLink) skipLink.style.display = 'none';
   document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
   document.getElementById('assessor-name').value = '';
   document.getElementById('notes').value = '';
   document.getElementById('assessment-date').value = new Date().toISOString().split('T')[0];
+  // Return focus to the top of the form
+  document.getElementById('county').focus();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
