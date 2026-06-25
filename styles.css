@@ -272,8 +272,8 @@ fieldset.context-card .input-hint { color: #888; }
 
 /* ── FORM GRID ───────────────────────────────────────────── */
 .form-grid { display: grid; gap: var(--space-md); min-width: 0; }
-.two-col   { grid-template-columns: repeat(2, 1fr); }
-.three-col { grid-template-columns: repeat(3, 1fr); }
+.two-col   { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.three-col { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .form-group { display: flex; flex-direction: column; gap: var(--space-xs); min-width: 0; }
 
@@ -668,6 +668,20 @@ textarea {
   .three-col, .two-col { grid-template-columns: 1fr; }
   .score-cards-row     { grid-template-columns: 1fr; }
   .main-content        { padding: 0 var(--space-sm); margin: var(--space-sm) auto; }
+
+  /* Prevent Safari overflow on long form labels + input controls */
+  .form-group,
+  .form-group > label,
+  .form-group > select,
+  .form-group > input,
+  .form-group > textarea {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  input[type="date"] {
+    min-width: 0;
+  }
 
   /* Reduce header height on mobile — no clock displayed */
   .site-header { padding: var(--space-xs) var(--space-sm); }
