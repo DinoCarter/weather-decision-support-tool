@@ -291,6 +291,9 @@ label {
   gap: 0.25rem;
 }
 
+  /* allow inputs inside flex/grid containers to shrink on small screens */
+  min-width: 0;
+  max-width: 100%;
 .optional {
   font-weight: 400;
   text-transform: none;
