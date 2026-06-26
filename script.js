@@ -134,7 +134,7 @@ function calcScoreByType(inputs, mode, type) {
  * WBGT and Heat Index are mutually exclusive.
  */
 function calcHeatScores() {
-  const useWBGT = getHeatSourceSelection() === 'wbgt';
+  const useWBGT = document.querySelector('input[name="heat-source"]:checked').value === 'wbgt';
   const heatStress = useWBGT
     ? getSelectVal('heat-wbgt')
     : getSelectVal('heat-hi');
@@ -350,12 +350,6 @@ function formatDateTime(d) {
   });
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 /* ═══════════════════════════════════════════════════════════
    4. RESULTS RENDERER
    ═══════════════════════════════════════════════════════════ */
@@ -364,20 +358,22 @@ function escapeHtml(str) {
  * Build and inject all results HTML into #results-content.
  */
 function renderResults(activeModes) {
-  const activeModeSet = activeModes instanceof Set ? activeModes : new Set(activeModes || []);
-  const county = document.getElementById('county').value;
-  const assessDate = document.getElementById('assessment-date').value;
-  const forecastPer = document.getElementById('forecast-period').value;
-  const assessor = document.getElementById('assessor-name').value;
-  const confidence = document.getElementById('forecast-confidence').value;
-  const calcTime = formatDateTime(new Date());
+  const county       = document.getElementById('county').value;
+  const assessDate   = document.getElementById('assessment-date').value;
+  const forecastPer  = document.getElementById('forecast-period').value;
+  const assessor     = document.getElementById('assessor-name').value;
+  const confidence   = document.getElementById('forecast-confidence').value;
+  const calcTime     = formatDateTime(new Date());
 
-  const checkedAdvisories = [...document.querySelectorAll('input[name="advisory"]:checked')].map(el => el.value);
+  // Gather checked advisories
+  const checkedAdvisories = [...document.querySelectorAll('input[name="advisory"]:checked')]
+    .map(el => el.value);
 
+  // Build meta line
   const metaParts = [countyName(county)];
   if (assessDate) metaParts.push(`Assessment date: ${assessDate}`);
-  if (forecastPer) metaParts.push(`Forecast period: ${escapeHtml(forecastPer)}`);
-  if (assessor) metaParts.push(`Assessor: ${escapeHtml(assessor)}`);
+  if (forecastPer) metaParts.push(`Forecast period: ${forecastPer}`);
+  if (assessor) metaParts.push(`Assessor: ${assessor}`);
   metaParts.push(`Generated: ${calcTime}`);
 
   const confidenceLabels = { high: 'High Confidence', moderate: 'Moderate Confidence', low: 'Low Confidence' };
@@ -403,28 +399,25 @@ function renderResults(activeModes) {
     </div>
   `;
 
+  // Build score blocks per mode
   const modeOrder = ['severe', 'heat', 'winter'];
   const modeConfig = {
     severe: { label: '⛈ Severe Weather', cssClass: 'severe', calcFn: calcSevereScores },
-    heat: { label: '☀ Heat', cssClass: 'heat', calcFn: calcHeatScores },
+    heat:   { label: '☀ Heat',            cssClass: 'heat',   calcFn: calcHeatScores },
     winter: { label: '❄ Winter Weather', cssClass: 'winter', calcFn: calcWinterScores },
   };
 
   const allConditionItems = [];
-  const allScores = [];
 
   modeOrder.forEach(mode => {
-    if (!activeModeSet.has(mode)) return;
-
+    if (!activeModes.includes(mode)) return;
     const cfg = modeConfig[mode];
     const result = cfg.calcFn();
     const categories = [
-      { key: 'campus', label: 'Campus Operations', score: result.campus },
+      { key: 'campus',  label: 'Campus Operations', score: result.campus },
       { key: 'outdoor', label: 'Outdoor Activities', score: result.outdoor },
-      { key: 'roads', label: 'Roads & Travel', score: result.roads, subdued: mode === 'heat' },
+      { key: 'roads',   label: 'Roads & Travel',     score: result.roads, subdued: mode === 'heat' },
     ];
-
-    allScores.push(...categories.map(category => ({ ...category, mode })));
 
     html += `
       <div class="mode-results-block">
@@ -435,58 +428,12 @@ function renderResults(activeModes) {
       </div>
     `;
 
+    // Build condition items for summary
     const condItems = buildConditionSummary(mode, result.rawInputs, county, result);
     condItems.forEach(item => allConditionItems.push({ ...item, mode: cfg.label }));
   });
 
-  const highestRisk = allScores.length
-    ? allScores.reduce((highest, current) => current.score > highest.score ? current : highest, allScores[0])
-    : null;
-  const highestLevel = highestRisk ? scoreToLevel(highestRisk.score) : 'green';
-  const highestRecommendation = highestRisk
-    ? getRecommendation(highestLevel, highestRisk.key)
-    : getRecommendation(highestLevel, 'campus');
-
-  html += `
-    <section class="briefing-banner">
-      <div class="briefing-banner__title">Decision Support Assessment</div>
-      <div class="briefing-banner__text">
-        This assessment is intended to support operational decision-making and
-        should be used in conjunction with National Weather Service products,
-        local observations, university policy, and professional judgment.
-      </div>
-    </section>
-
-    <section class="executive-summary">
-      <div class="executive-summary__header">Executive Summary</div>
-      <div class="executive-summary__grid">
-        <div class="executive-summary__item">
-          <div class="executive-summary__label">Highest Risk Category</div>
-          <div class="executive-summary__value">${highestRisk ? highestRisk.label : 'No active hazard mode'}</div>
-        </div>
-        <div class="executive-summary__item">
-          <div class="executive-summary__label">Risk Level</div>
-          <div class="executive-summary__value">${LEVEL_LABELS[highestLevel]}</div>
-        </div>
-        <div class="executive-summary__item">
-          <div class="executive-summary__label">Risk Score</div>
-          <div class="executive-summary__value">${highestRisk ? `${highestRisk.score} / 100` : '—'}</div>
-        </div>
-      </div>
-      <div class="executive-summary__action">
-        <strong>Recommended Action:</strong>
-        ${highestRecommendation}
-      </div>
-    </section>
-
-    <div class="executive-summary__concerns">
-      <div class="executive-summary__label">Primary Concerns</div>
-      <ul class="executive-summary__concerns-list">
-        ${allConditionItems.slice(0, 5).map(item => `<li>${item.tag}</li>`).join('')}
-      </ul>
-    </div>
-  `;
-
+  // Condition Summary block
   html += `
     <div class="condition-summary-wrapper">
       <button
@@ -512,6 +459,7 @@ function renderResults(activeModes) {
 
   document.getElementById('results-content').innerHTML = html;
 
+  // Wire up condition summary toggle
   const condBtn = document.getElementById('condition-summary-btn');
   const condBody = document.getElementById('condition-summary-body');
   if (condBtn && condBody) {
@@ -575,42 +523,29 @@ function toggleMode(mode, btn) {
   }
 }
 
-function getHeatSourceSelection() {
-  const checked = document.querySelector('input[name="heat-source"]:checked');
-  return checked ? checked.value : 'wbgt';
-}
-
-function setHeatSourceUI(useWBGT) {
-  const wbgtGroup = document.getElementById('wbgt-field-group');
-  const hiGroup   = document.getElementById('hi-field-group');
-  const wbgtSel   = document.getElementById('heat-wbgt');
-  const hiSel     = document.getElementById('heat-hi');
-
-  if (wbgtSel) {
-    wbgtSel.disabled = !useWBGT;
-    wbgtSel.setAttribute('aria-disabled', String(!useWBGT));
-  }
-  if (hiSel) {
-    hiSel.disabled = useWBGT;
-    hiSel.setAttribute('aria-disabled', String(useWBGT));
-  }
-  if (wbgtGroup) wbgtGroup.style.opacity = useWBGT ? '1' : '0.4';
-  if (hiGroup) hiGroup.style.opacity = useWBGT ? '0.4' : '1';
-}
-
 /**
  * Handle the WBGT / Heat Index mutual exclusivity toggle.
  */
 function initHeatSourceToggle() {
   const radios = document.querySelectorAll('input[name="heat-source"]');
+  const wbgtGroup = document.getElementById('wbgt-field-group');
+  const hiGroup   = document.getElementById('hi-field-group');
+  const wbgtSel   = document.getElementById('heat-wbgt');
+  const hiSel     = document.getElementById('heat-hi');
 
   radios.forEach(radio => {
     radio.addEventListener('change', () => {
-      setHeatSourceUI(radio.value === 'wbgt');
+      const useWBGT = radio.value === 'wbgt';
+      // WBGT active
+      wbgtSel.disabled = !useWBGT;
+      wbgtSel.setAttribute('aria-disabled', String(!useWBGT));
+      if (wbgtGroup) wbgtGroup.style.opacity = useWBGT ? '1' : '0.4';
+      // Heat Index active
+      hiSel.disabled = useWBGT;
+      hiSel.setAttribute('aria-disabled', String(useWBGT));
+      if (hiGroup) hiGroup.style.opacity = useWBGT ? '0.4' : '1';
     });
   });
-
-  setHeatSourceUI(getHeatSourceSelection() === 'wbgt');
 }
 
 /**
@@ -737,284 +672,260 @@ function updateClock() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   8. PDF EXPORT — BRIEFING SHEET
+   8. PDF EXPORT
    ═══════════════════════════════════════════════════════════ */
 
 /**
- * Build the print-only briefing sheet HTML and inject it into
- * #print-report (created if it doesn't exist). Then trigger
- * window.print(). The @media print stylesheet hides everything
- * else and renders only this div.
+ * Abbreviated one-sentence condition descriptions for the print report.
+ * Keyed by mode → inputKey → rawScore value → string.
  */
-function handleExport() {
-  const county       = document.getElementById('county').value;
-  const assessDate   = document.getElementById('assessment-date').value;
-  const forecastPer  = document.getElementById('forecast-period').value;
-  const assessor     = document.getElementById('assessor-name').value;
-  const confidence   = document.getElementById('forecast-confidence').value;
-  const calcTime     = formatDateTime(new Date());
-  const checkedAdv   = [...document.querySelectorAll('input[name="advisory"]:checked')].map(el => el.value);
-  const confidenceLabels = { high: 'High', moderate: 'Moderate', low: 'Low' };
-  const activeModeArr = [...activeModes];
+function getAbbrConditionText(mode, key, rawScore, county, extra) {
+  const c = countyName(county);
+  if (mode === 'severe') {
+    if (key === 'rain') {
+      const label = rawScore === 33 ? '0.01–0.75"' : rawScore === 67 ? '0.75–1.5"' : '>1.5"';
+      return `${label} of rain forecast — evaluate drainage, road ponding, and outdoor surface risk.`;
+    }
+    if (key === 'hail') return rawScore === 100
+      ? 'Large hail (≥1") forecast — meets NWS Severe Thunderstorm Warning criteria; evaluate roof and vehicle exposure.'
+      : 'Small hail (<1") forecast — evaluate outdoor equipment and roof exposure.';
+    if (key === 'lightning') return 'Lightning forecast — no outdoor activity should proceed without an established safety and evacuation protocol.';
+    if (key === 'windSust') {
+      const label = { 25: '20–30 mph', 50: '30–40 mph', 75: '40–50 mph', 100: '>50 mph' }[rawScore];
+      return `Sustained winds of ${label} — evaluate temporary structures, signage, and outdoor tenting.`;
+    }
+    if (key === 'windGust') {
+      const label = { 25: '30–40 mph', 50: '40–50 mph', 75: '50–60 mph', 100: '>60 mph' }[rawScore];
+      return `Gusts of ${label} — evaluate vehicle handling and structural resilience; gusts >58 mph meet High Wind Warning criteria.`;
+    }
+    if (key === 'flood') return 'Flash flooding possible — evaluate low-lying road routes, campus drainage, and parking lot risk.';
+    if (key === 'tornado') return 'Tornado possible — verify shelter-in-place locations are accessible and evacuation routes are clear.';
+  }
+  if (mode === 'heat') {
+    if (key === 'heatStress') {
+      const measure = extra && extra.usedWBGT ? 'WBGT' : 'Heat Index';
+      const level = { 33: 'moderate', 67: 'high', 100: 'extreme' }[rawScore];
+      return `${measure} indicates ${level} heat stress — evaluate outdoor work schedules, athletic activity, and cooling station availability.`;
+    }
+    if (key === 'windSust') return 'Elevated wind speeds in heat context — above 30 mph, drying effect diminishes and sustained exposure risk remains high.';
+  }
+  if (mode === 'winter') {
+    if (key === 'ice') {
+      const label = { 33: 'trace–0.10"', 67: '0.10–0.25"', 100: '>0.25"' }[rawScore];
+      const note = rawScore === 100 ? ' Exceeds NWS Ice Storm Warning threshold.' : rawScore === 67 ? ' Approaches NWS Ice Storm Warning threshold.' : '';
+      return `Ice accumulation of ${label} forecast.${note} Evaluate sidewalk treatment schedules and parking lot access.`;
+    }
+    if (key === 'snow') {
+      const label = { 33: '1–3"', 67: '3–6"', 100: '>6"' }[rawScore];
+      return `Snow accumulation of ${label} forecast — evaluate snow removal capacity and early-morning campus access.`;
+    }
+    if (key === 'windChill') {
+      const label = { 25: '20–32°F', 50: '10–20°F', 75: '0–10°F', 100: '<0°F' }[rawScore];
+      const note = rawScore >= 75 ? ' Meets Wind Chill Warning threshold.' : rawScore === 50 ? ' Meets Wind Chill Advisory threshold.' : '';
+      return `Wind chill of ${label} forecast.${note} Evaluate outdoor exposure duration for personnel and attendees.`;
+    }
+    if (key === 'windGust') {
+      const label = { 25: '30–40 mph', 50: '40–50 mph', 75: '50–60 mph', 100: '>60 mph' }[rawScore];
+      return `Gusts of ${label} in winter conditions — worsens wind chill and creates blowing snow visibility hazards.`;
+    }
+    if (key === 'freezeThaw') return 'Freeze-thaw cycle expected — primary black ice formation risk; evaluate treatment schedules, especially for morning refreezing.';
+  }
+  return '';
+}
 
-  // ── Collect all scores and condition items across active modes ──
-  const modeConfig = {
-    severe: { label: 'Severe Weather', calcFn: calcSevereScores },
-    heat:   { label: 'Heat',           calcFn: calcHeatScores   },
-    winter: { label: 'Winter Weather', calcFn: calcWinterScores },
+/**
+ * Build abbreviated condition rows for a single hazard mode.
+ * Returns array of { tag, level, text } — only inputs with rawScore > 0.
+ */
+function buildAbbrConditions(mode, rawInputs, county, extra) {
+  const inputOrder = {
+    severe: ['rain','hail','lightning','windSust','windGust','flood','tornado'],
+    heat:   ['heatStress','windSust'],
+    winter: ['ice','snow','windChill','windGust','freezeThaw'],
   };
-  const modeOrder = ['severe', 'heat', 'winter'];
+  const tagLabels = {
+    rain: 'Rain', hail: 'Hail', lightning: 'Lightning', windSust: 'Sustained Wind',
+    windGust: 'Wind Gusts', flood: 'Flash Flood', tornado: 'Tornado Possible',
+    heatStress: extra && extra.usedWBGT ? 'WBGT' : 'Heat Index',
+    ice: 'Ice Accumulation', snow: 'Snow Accumulation', windChill: 'Wind Chill',
+    freezeThaw: 'Freeze-Thaw Cycle',
+  };
 
-  const allScores = [];
-  const allCondItems = [];
-  const modeResults = [];
-
-  modeOrder.forEach(mode => {
-    if (!activeModes.has(mode)) return;
-    const cfg    = modeConfig[mode];
-    const result = cfg.calcFn();
-    const cats   = [
-      { key: 'campus',  label: 'Campus Operations',  score: result.campus  },
-      { key: 'outdoor', label: 'Outdoor Activities', score: result.outdoor },
-      { key: 'roads',   label: 'Roads & Travel',     score: result.roads, subdued: mode === 'heat' },
-    ];
-    cats.forEach(c => allScores.push({ ...c, mode, modeLabel: cfg.label }));
-    const condItems = buildConditionSummary(mode, result.rawInputs, county, result);
-    condItems.forEach(item => allCondItems.push({ ...item, modeLabel: cfg.label }));
-    modeResults.push({ mode, label: cfg.label, cats, result });
+  const items = [];
+  (inputOrder[mode] || []).forEach(key => {
+    const val = rawInputs[key] || 0;
+    if (val === 0) return;
+    const text = getAbbrConditionText(mode, key, val, county, extra);
+    if (!text) return;
+    items.push({ tag: tagLabels[key] || key, level: scoreToLevel(val), text });
   });
+  return items;
+}
 
-  // ── Executive summary values ──
-  const highestRisk  = allScores.length
-    ? allScores.reduce((h, c) => c.score > h.score ? c : h, allScores[0])
-    : null;
-  const highestLevel = highestRisk ? scoreToLevel(highestRisk.score) : 'green';
-  const highestRec   = highestRisk
-    ? getRecommendation(highestLevel, highestRisk.key)
-    : 'No active hazard modes selected.';
+function handleExport() {
+  // Gather form values
+  const county      = document.getElementById('county').value || '';
+  const assessDate  = document.getElementById('assessment-date').value || '—';
+  const forecastPer = document.getElementById('forecast-period').value || '—';
+  const assessor    = document.getElementById('assessor-name').value || '—';
+  const confEl      = document.getElementById('forecast-confidence');
+  const confShort   = confEl ? confEl.value : 'high';
+  const confLabel   = { high: 'High Confidence', moderate: 'Moderate Confidence', low: 'Low Confidence' }[confShort] || confShort;
+  const calcTime    = formatDateTime(new Date());
+  const countyLabel = countyName(county);
 
-  // Sort condition items: red > amber > yellow > green
-  const levelOrder = { red: 0, amber: 1, yellow: 2, green: 3 };
-  const sortedCond = [...allCondItems].sort((a, b) =>
-    (levelOrder[a.level] ?? 4) - (levelOrder[b.level] ?? 4)
-  );
-  const primaryConcerns = sortedCond.filter(i => i.level !== 'green').slice(0, 5);
+  const checkedAdvisories = [...document.querySelectorAll('input[name="advisory"]:checked')]
+    .map(el => el.value);
 
-  // ── Build HTML ──
-  const e = escapeHtml;
-
-  // Assessment info meta block
-  const metaItems = [
-    { label: 'County',            value: countyName(county) || '—' },
-    { label: 'Assessment Date',   value: assessDate || '—' },
-    { label: 'Forecast Period',   value: forecastPer || '—' },
-    { label: 'Assessor',          value: assessor || '—' },
-    { label: 'Generated',         value: calcTime },
-    { label: 'Forecast Confidence', value: confidenceLabels[confidence] || '—' },
+  // Mode config (same order as screen)
+  const modeOrder = ['severe', 'heat', 'winter'];
+  const modeConfig = {
+    severe: { label: 'Severe Weather', icon: '⛈', calcFn: calcSevereScores },
+    heat:   { label: 'Heat',           icon: '☀', calcFn: calcHeatScores   },
+    winter: { label: 'Winter Weather', icon: '❄', calcFn: calcWinterScores },
+  };
+  const categories = [
+    { key: 'campus',  label: 'Campus Operations' },
+    { key: 'outdoor', label: 'Outdoor Activities' },
+    { key: 'roads',   label: 'Roads & Travel'     },
   ];
 
-  const metaHTML = metaItems.map(m => `
-    <div class="rpt-meta-item">
-      <div class="rpt-meta-label">${m.label}</div>
-      <div class="rpt-meta-value">${e(m.value)}</div>
-    </div>`).join('');
-
-  const advisoriesHTML = checkedAdv.length > 0 ? `
-    <div class="rpt-meta-advisories">
-      <div class="rpt-meta-label">Active NWS Advisories</div>
-      <div class="rpt-advisory-pills">
-        ${checkedAdv.map(a => `<span class="rpt-advisory-pill">${e(a)}</span>`).join('')}
-      </div>
+  // Advisory bar HTML
+  const advisoryBarHTML = checkedAdvisories.length > 0 ? `
+    <div class="rpt-advisory-bar">
+      <span class="rpt-advisory-label">Active NWS Advisories</span>
+      ${checkedAdvisories.map(a => `<span class="rpt-advisory-pill">${a}</span>`).join('')}
     </div>` : '';
 
-  // Risk summary tables — one per active mode
-  const riskTablesHTML = modeResults.map(mr => {
-    const rows = mr.cats.map(cat => {
-      const level = scoreToLevel(cat.score);
-      const scoreDisplay = cat.subdued
-        ? `<span class="rpt-subdued">${cat.score}</span>`
-        : `${cat.score}`;
+  // Build mode sections
+  let modeSectionsHTML = '';
+  modeOrder.forEach(mode => {
+    if (![...activeModes].includes(mode)) return;
+    const cfg    = modeConfig[mode];
+    const result = cfg.calcFn();
+    const abbrConds = buildAbbrConditions(mode, result.rawInputs, county, result);
+
+    // Score cells
+    const scoreCellsHTML = categories.map(cat => {
+      const score   = result[cat.key];
+      const level   = scoreToLevel(score);
+      const label   = LEVEL_LABELS[level];
+      const rec     = getRecommendation(level, cat.key);
+      const subdued = cat.key === 'roads' && mode === 'heat';
       return `
-        <tr>
-          <td>${e(cat.label)}</td>
-          <td class="col-score">${scoreDisplay}</td>
-          <td class="col-level">
-            ${cat.subdued
-              ? `<span class="rpt-subdued">Low relevance in heat mode</span>`
-              : `<span class="rpt-level-badge ${level}">${LEVEL_LABELS[level]}</span>`}
-          </td>
-          <td style="font-size:7pt;color:#555">${cat.subdued ? 'Heat has minimal direct impact on road conditions.' : e(getRecommendation(level, cat.key))}</td>
-        </tr>`;
+        <div class="rpt-score-cell${subdued ? ' rpt-score-cell--subdued' : ''}">
+          <div class="rpt-score-cat">${cat.label}</div>
+          <div class="rpt-score-level-row">
+            <div class="rpt-risk-bar rpt-risk-bar--${level}"></div>
+            <div class="rpt-score-num-block">
+              <div class="rpt-score-num">${score}</div>
+              <div class="rpt-score-outof">/ 100</div>
+            </div>
+          </div>
+          <div class="rpt-score-status">${label}</div>
+          <div class="rpt-score-rec">${rec}</div>
+          ${subdued ? '<div class="rpt-subdued-note">Heat has minimal direct road impact — score reflects indirect factors only.</div>' : ''}
+        </div>`;
     }).join('');
 
-    return `
-      <tr class="mode-header"><td colspan="4">${e(mr.label)}</td></tr>
-      ${rows}`;
-  }).join('');
+    // Condition rows
+    const condRowsHTML = abbrConds.length > 0 ? `
+      <div class="rpt-conditions">
+        <div class="rpt-conditions-heading">Contributing Factors</div>
+        ${abbrConds.map(c => `
+          <div class="rpt-condition-row">
+            <div class="rpt-cond-indicator rpt-cond-indicator--${c.level}"></div>
+            <div class="rpt-cond-tag">${c.tag}</div>
+            <div class="rpt-cond-text">${c.text}</div>
+          </div>`).join('')}
+      </div>` : '';
 
-  // Key hazard details table (sorted by severity)
-  const hazardRowsHTML = sortedCond.map(item => `
-    <tr class="haz-${item.level}">
-      <td class="col-hazard">${e(item.tag)}</td>
-      <td class="col-impact">${e(item.text)}</td>
-    </tr>`).join('');
-
-  const html = `
-    <div class="rpt-header">
-      <div class="rpt-header-left">
-        <div class="rpt-org">Oklahoma State University &nbsp;|&nbsp; Office of Emergency Management</div>
-        <div class="rpt-title">Weather Decision Support Tool</div>
-        <div class="rpt-subtitle">Risk Assessment Report &nbsp;—&nbsp; ${e(countyName(county) || 'County Not Selected')}</div>
-      </div>
-      <div class="rpt-header-right">
-        <div>WDST v2.0 &nbsp;|&nbsp; Beta</div>
-        <div>For Internal Use Only</div>
-        <div>${e(calcTime)}</div>
-      </div>
-    </div>
-
-    <div class="rpt-notice">
-      <strong>Decision Support Notice</strong>
-      <ul>
-        <li>Decision support tool only — not an official forecast</li>
-        <li>Does not replace NWS products or professional judgment</li>
-        <li>Does not replace university policy or leadership direction</li>
-        <li>Reassess as conditions evolve</li>
-      </ul>
-    </div>
-
-    <div class="rpt-meta-block">
-      ${metaHTML}
-      ${advisoriesHTML}
-    </div>
-
-    <div class="rpt-section-heading">Executive Summary</div>
-    <div class="rpt-exec">
-      <div class="rpt-exec-grid">
-        <div class="rpt-exec-item">
-          <div class="rpt-exec-label">Highest Risk Category</div>
-          <div class="rpt-exec-value">${e(highestRisk ? highestRisk.label : '—')}</div>
+    modeSectionsHTML += `
+      <div class="rpt-mode-section">
+        <div class="rpt-mode-header">
+          <div class="rpt-mode-title">${cfg.icon} ${cfg.label}</div>
+          <div class="rpt-mode-subtitle">Predictive Risk Assessment</div>
         </div>
-        <div class="rpt-exec-item">
-          <div class="rpt-exec-label">Risk Score</div>
-          <div class="rpt-exec-value">${highestRisk ? highestRisk.score : '—'} / 100</div>
+        <div class="rpt-score-table">${scoreCellsHTML}</div>
+        ${condRowsHTML}
+      </div>`;
+  });
+
+  // Assemble full report
+  const reportHTML = `
+    <div id="print-report-root">
+      <div class="rpt-header">
+        <div class="rpt-header-logo"></div>
+        <div class="rpt-header-body">
+          <div class="rpt-header-org">Oklahoma State University — Office of Emergency Management</div>
+          <div class="rpt-header-title">Weather Risk Assessment</div>
+          <div class="rpt-header-sub">${countyLabel} &nbsp;·&nbsp; Forecast Period: ${forecastPer}</div>
         </div>
-        <div class="rpt-exec-item">
-          <div class="rpt-exec-label">Risk Level</div>
-          <div class="rpt-exec-value level-${highestLevel}">${LEVEL_LABELS[highestLevel]}</div>
-        </div>
-        <div class="rpt-exec-item">
-          <div class="rpt-exec-label">Hazard Mode(s)</div>
-          <div class="rpt-exec-value" style="font-size:8pt">${activeModeArr.map(m => modeConfig[m].label).join(', ') || '—'}</div>
+        <div class="rpt-header-meta">
+          <div class="rpt-meta-row">Date: <strong>${assessDate}</strong></div>
+          <div class="rpt-meta-row">Assessor: <strong>${assessor}</strong></div>
+          <div class="rpt-meta-row">Generated: <strong>${calcTime}</strong></div>
+          <div class="rpt-meta-row" style="margin-top:3pt;"><span class="rpt-conf-badge">${confLabel}</span></div>
         </div>
       </div>
-      <div class="rpt-exec-action">
-        <strong>Recommended Action:</strong> ${e(highestRec)}
+
+      <div class="rpt-infobar">
+        <div class="rpt-infobar-cell">
+          <div class="rpt-info-label">County</div>
+          <div class="rpt-info-value">${countyLabel}</div>
+        </div>
+        <div class="rpt-infobar-cell">
+          <div class="rpt-info-label">Assessment Date</div>
+          <div class="rpt-info-value">${assessDate}</div>
+        </div>
+        <div class="rpt-infobar-cell">
+          <div class="rpt-info-label">Forecast Period</div>
+          <div class="rpt-info-value">${forecastPer}</div>
+        </div>
+        <div class="rpt-infobar-cell">
+          <div class="rpt-info-label">Assessor</div>
+          <div class="rpt-info-value">${assessor}</div>
+        </div>
+        <div class="rpt-infobar-cell">
+          <div class="rpt-info-label">Confidence</div>
+          <div class="rpt-info-value">${confLabel}</div>
+        </div>
       </div>
-      ${primaryConcerns.length > 0 ? `
-      <div class="rpt-primary-concerns">
-        <strong>Primary Concerns</strong>
-        <ul class="rpt-concerns-list">
-          ${primaryConcerns.map(c => `<li>${e(c.tag)}</li>`).join('')}
-        </ul>
-      </div>` : ''}
-    </div>
 
-    <div class="rpt-section-heading">Risk Summary</div>
-    <table class="rpt-risk-table">
-      <thead>
-        <tr>
-          <th>Category</th>
-          <th class="col-score">Score</th>
-          <th class="col-level">Risk Level</th>
-          <th>Recommended Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${riskTablesHTML}
-      </tbody>
-    </table>
+      ${advisoryBarHTML}
 
-    ${sortedCond.length > 0 ? `
-    <div class="rpt-section-heading">Key Hazard Details</div>
-    <div class="rpt-hazards">
-      <table class="rpt-hazard-table">
-        <thead>
-          <tr>
-            <th class="col-hazard">Hazard</th>
-            <th class="col-impact">Operational Impact</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${hazardRowsHTML}
-        </tbody>
-      </table>
-    </div>` : ''}
+      ${modeSectionsHTML}
 
-    <div class="rpt-footer-disclaimer">
-      <strong>Beta Testing &amp; Development Disclaimer</strong>
-      <ul>
-        <li>This tool is in beta testing and under active development</li>
-        <li>Do not use as the sole basis for any operational decision</li>
-        <li>Consult NWS forecasts, warnings, and observations</li>
-        <li>Consult other relevant meteorological information</li>
-        <li>Does not constitute an official university decision or directive</li>
-        <li>Final authority rests with authorized university leadership</li>
-      </ul>
-      <div class="rpt-footer-meta">
-        <span>Oklahoma State University — Office of Emergency Management &nbsp;|&nbsp; WDST v2.0 Beta</span>
-        <span>Generated: ${e(calcTime)}</span>
+      <div class="rpt-footer">
+        <div class="rpt-disclaimer">
+          <strong>Decision Support Only.</strong> This tool provides structured risk scores to inform human judgment. Scores are based on forecast inputs and do not constitute an official university policy, emergency directive, or operational order. Final authority rests with authorized Oklahoma State University leadership. Forecasts are subject to change — reassess as conditions evolve.
+        </div>
+        <div class="rpt-footer-right">WDST v2.0 &nbsp;|&nbsp; For Internal Use Only</div>
       </div>
     </div>
   `;
 
-  // Inject into (or create) the print report container
-  let printDiv = document.getElementById('print-report');
-  if (!printDiv) {
-    printDiv = document.createElement('div');
-    printDiv.id = 'print-report';
-    // Hidden on screen — only visible in @media print
-    printDiv.style.cssText = 'display:none';
-    document.body.appendChild(printDiv);
-  }
-  printDiv.innerHTML = html;
+  // Inject report root into body
+  const reportRoot = document.createElement('div');
+  reportRoot.id = 'print-report-root-wrapper';
+  reportRoot.innerHTML = reportHTML;
+  document.body.appendChild(reportRoot);
 
+  // Print
   window.print();
+
+  // Clean up
+  const cleanup = () => {
+    const el = document.getElementById('print-report-root-wrapper');
+    if (el) el.remove();
+  };
+  window.addEventListener('afterprint', cleanup, { once: true });
+  setTimeout(cleanup, 3000);
 }
 
 /* ═══════════════════════════════════════════════════════════
    9. INIT
    ═══════════════════════════════════════════════════════════ */
-function initBetaModal() {
-  const modal = document.getElementById('beta-modal');
-  const closeBtn = document.getElementById('beta-modal-close');
-
-  if (!modal || !closeBtn) return;
-
-  const closeModal = () => {
-    modal.hidden = true;
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('modal-open');
-
-    const countySelect = document.getElementById('county');
-    if (countySelect) countySelect.focus();
-  };
-
-  modal.hidden = false;
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-  closeBtn.focus();
-
-  closeBtn.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', event => {
-    if (event.target === modal) closeModal();
-  });
-
-  document.addEventListener('keydown', event => {
-    if (!modal.hidden && event.key === 'Escape') closeModal();
-  });
-}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -1044,8 +955,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Data sources panel
   initDataSourcesPanel();
-  initBetaModal();
-
 
   // Live clock — update immediately, then every 30 seconds
   updateClock();
