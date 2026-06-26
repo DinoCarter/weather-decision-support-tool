@@ -905,9 +905,10 @@ function handleExport() {
     </div>
   `;
 
-  // Inject report root into body
+  // Inject report root into body — hidden on screen, visible only at print
   const reportRoot = document.createElement('div');
   reportRoot.id = 'print-report-root-wrapper';
+  reportRoot.style.display = 'none';
   reportRoot.innerHTML = reportHTML;
   document.body.appendChild(reportRoot);
 

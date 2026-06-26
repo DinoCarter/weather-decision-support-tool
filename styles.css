@@ -865,7 +865,7 @@ input:disabled {
   }
 
   /* ── Hide the entire screen UI — report is injected by JS ── */
-  body > *:not(#print-report-root) { display: none !important; }
+  body > *:not(#print-report-root-wrapper) { display: none !important; }
 
   /* ── Full-page report root ── */
   #print-report-root {
