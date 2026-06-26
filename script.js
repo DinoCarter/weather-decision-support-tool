@@ -713,6 +713,21 @@ function handleExport() {
 /* ═══════════════════════════════════════════════════════════
    9. INIT
    ═══════════════════════════════════════════════════════════ */
+function initBetaModal() {
+  const modal = document.getElementById('beta-modal');
+  const closeBtn = document.getElementById('beta-modal-close');
+
+  if (!modal || !closeBtn) return;
+
+  closeBtn.focus();
+
+  closeBtn.addEventListener('click', () => {
+    modal.hidden = true;
+
+    const countySelect = document.getElementById('county');
+    if (countySelect) countySelect.focus();
+  });
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -742,6 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Data sources panel
   initDataSourcesPanel();
+  initBetaModal();
+
 
   // Live clock — update immediately, then every 30 seconds
   updateClock();
