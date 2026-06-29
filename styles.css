@@ -133,12 +133,30 @@ legend { display: contents; }
   width: min(700px, 100%);
   max-height: 90vh;
   overflow-y: auto;
-
   background: #ffffff;
   border-radius: 12px;
   padding: 2rem;
-
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+  color: var(--text-primary);
+}
+
+.beta-modal__content h2 {
+  margin: 0 0 1rem;
+  color: var(--osu-orange);
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.beta-modal__content p {
+  margin: 0 0 1rem;
+  line-height: 1.7;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.beta-modal__content .calculate-btn {
+  margin-top: 0.5rem;
+  align-self: flex-start;
 }
 
 body.modal-open {
