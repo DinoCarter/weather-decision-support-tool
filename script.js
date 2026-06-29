@@ -99,13 +99,36 @@ function initBetaModal() {
 
   if (!modal || !closeBtn) return;
 
+  const storageKey = 'wdst-beta-modal-dismissed';
+  let shouldShow = true;
+
+  try {
+    shouldShow = localStorage.getItem(storageKey) !== 'true';
+  } catch (error) {
+    shouldShow = true;
+  }
+
+  if (!shouldShow) {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+    return;
+  }
+
   modal.hidden = false;
   document.body.classList.add('modal-open');
 
-  closeBtn.addEventListener('click', () => {
+  const closeModal = () => {
     modal.hidden = true;
     document.body.classList.remove('modal-open');
-  });
+
+    try {
+      localStorage.setItem(storageKey, 'true');
+    } catch (error) {
+      // Ignore storage errors and still close the modal.
+    }
+  };
+
+  closeBtn.addEventListener('click', closeModal);
 }
 
 /**
@@ -1045,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   //In Beta Modal
   initBetaModal();
-  
+
   // Live clock — update immediately, then every 30 seconds
   updateClock();
   setInterval(updateClock, 30000);

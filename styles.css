@@ -106,6 +106,45 @@ legend { display: contents; }
 }
 :focus:not(:focus-visible) { outline: none; }
 
+/* ─── BETA MODEL OVERLAY  ────────────────────────────────────────── */
+
+.beta-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.75);
+  padding: 1.5rem;
+}
+
+.beta-modal[hidden] {
+  display: none;
+}
+
+.beta-modal:not([hidden]) {
+  display: flex;
+}
+
+.beta-modal__content {
+  width: min(700px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
 /* ─── SITE HEADER ─────────────────────────────────────────── */
 .site-header {
   position: sticky;
