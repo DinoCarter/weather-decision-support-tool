@@ -91,6 +91,24 @@ const LEVEL_LABELS = {
 };
 
 /**
+ * In Beta Modal
+ */
+function initBetaModal() {
+  const modal = document.getElementById('beta-modal');
+  const closeBtn = document.getElementById('beta-modal-close');
+
+  if (!modal || !closeBtn) return;
+
+  modal.hidden = false;
+  document.body.classList.add('modal-open');
+
+  closeBtn.addEventListener('click', () => {
+    modal.hidden = true;
+    document.body.classList.remove('modal-open');
+  });
+}
+
+/**
  * Calculate a single score from an inputs object and a weight row.
  * Formula: Σ(rawScore × weight) / 100
  * Capped 0–100, rounded to nearest integer.
@@ -1025,6 +1043,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Data sources panel
   initDataSourcesPanel();
 
+  //In Beta Modal
+  initBetaModal();
+  
   // Live clock — update immediately, then every 30 seconds
   updateClock();
   setInterval(updateClock, 30000);
