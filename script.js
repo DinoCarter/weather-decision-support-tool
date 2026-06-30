@@ -1,6 +1,6 @@
 /**
- * HAWK v3.0 — script.js
- * HAWK — Weather Decision Support Tool
+ * Kestrel — script.js
+ * Know before you go
  */
 
 'use strict';
@@ -973,16 +973,16 @@ function handleExport() {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 8pt; color: #000; background: #fff; padding: 0.45in 0.5in 0.4in; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     @page { size: letter portrait; margin: 0; }
-    .rpt-header { border-bottom: 3pt solid #3B6E5C; margin-bottom: 7pt; padding-bottom: 6pt; }
+    .rpt-header { border-bottom: 3pt solid #C05B18; margin-bottom: 7pt; padding-bottom: 6pt; }
     .rpt-header-title { font-size: 16pt; font-weight: 800; color: #14181C; letter-spacing: 0.06em; margin-bottom: 1pt; }
-    .rpt-header-tagline { font-size: 7.5pt; color: #3B6E5C; font-weight: 600; margin-bottom: 3pt; }
+    .rpt-header-tagline { font-size: 7.5pt; color: #C05B18; font-weight: 600; margin-bottom: 3pt; }
     .rpt-header-sub { font-size: 7pt; color: #555; }
-    .rpt-infobar { display: flex; border: 1pt solid #ccc; border-left: 3pt solid #3B6E5C; margin-bottom: 7pt; background: #f8f8f8; }
+    .rpt-infobar { display: flex; border: 1pt solid #ccc; border-left: 3pt solid #C05B18; margin-bottom: 7pt; background: #f8f8f8; }
     .rpt-infobar-cell { flex: 1; padding: 4pt 7pt; border-right: 1pt solid #ddd; }
     .rpt-infobar-cell:last-child { border-right: none; }
     .rpt-info-label { font-size: 5.5pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-bottom: 1.5pt; }
     .rpt-info-value { font-size: 7.5pt; font-weight: 600; }
-    .rpt-advisory-bar { display: flex; align-items: baseline; gap: 5pt; border: 1pt solid #999; border-left: 3pt solid #3B6E5C; background: #f0f0f0; padding: 3.5pt 7pt; margin-bottom: 7pt; flex-wrap: wrap; }
+    .rpt-advisory-bar { display: flex; align-items: baseline; gap: 5pt; border: 1pt solid #999; border-left: 3pt solid #C05B18; background: #f0f0f0; padding: 3.5pt 7pt; margin-bottom: 7pt; flex-wrap: wrap; }
     .rpt-advisory-label { font-size: 6pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #333; }
     .rpt-advisory-pill { font-size: 6.5pt; font-weight: 600; background: #fff; border: 0.5pt solid #aaa; padding: 0.5pt 4pt; border-radius: 2pt; }
     .rpt-mode-section { border: 1pt solid #ccc; margin-bottom: 6pt; page-break-inside: avoid; }
@@ -1009,10 +1009,10 @@ function handleExport() {
     .rpt-footer-right { font-size: 5.5pt; color: #999; text-align: right; white-space: nowrap; }
   `;
 
-  const fullHTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><title>H.A.W.K. — ${locationName}</title><style>${reportStyles}</style></head><body>
+  const fullHTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><title>Kestrel — ${locationName}</title><style>${reportStyles}</style></head><body>
   <div class="rpt-header">
-    <div class="rpt-header-title">H.A.W.K.</div>
-    <div class="rpt-header-tagline">Weather Risk Scoring for Campus Decisions</div>
+    <div class="rpt-header-title">KESTREL</div>
+    <div class="rpt-header-tagline">Know before you go</div>
     <div class="rpt-header-sub">${locationName} &nbsp;&middot;&nbsp; ${formatDateTime(windowStart)} – ${formatDateTime(windowEnd)}</div>
   </div>
   <div class="rpt-infobar">
@@ -1024,7 +1024,7 @@ function handleExport() {
   ${alertsBarHTML}${modeSectionsHTML}
   <div class="rpt-footer">
     <div class="rpt-disclaimer"><strong>Decision Support Only.</strong> Risk scores do not constitute an official operational directive. Final authority rests with authorized campus leadership. Reassess as conditions evolve.</div>
-    <div class="rpt-footer-right">H.A.W.K. v3.0 &nbsp;|&nbsp; For Internal Use Only</div>
+    <div class="rpt-footer-right">Kestrel &nbsp;|&nbsp; For Internal Use Only</div>
   </div></body></html>`;
 
   const printWin = window.open('', '_blank', 'width=850,height=1100');
