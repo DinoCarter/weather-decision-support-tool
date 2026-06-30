@@ -9,11 +9,14 @@
   --osu-black:      #000000;
   --osu-orange:     #FE5C00;
   --osu-orange-dark:#CC4900;
+  --ink:            #14181C;
+  --accent:         #3B6E5C;
+  --accent-soft:    #9FB8AC;
 
   /* Backgrounds */
-  --bg-page:        #F5F5F5;
+  --bg-page:        #F4F5F3;
   --bg-card:        #FFFFFF;
-  --bg-context:     #111111;
+  --bg-context:     #14181C;
 
   /* Stoplight — risk levels */
   --risk-green:     #2E7D32;
@@ -78,8 +81,8 @@ body {
 }
 img, svg { display: block; max-width: 100%; }
 button { cursor: pointer; font-family: inherit; }
-a { color: var(--osu-orange-dark); text-decoration: underline; }
-a:hover { color: var(--osu-orange); }
+a { color: var(--accent); text-decoration: underline; }
+a:hover { color: var(--accent); }
 ul { list-style: none; }
 fieldset { border: none; }
 legend { display: contents; }
@@ -90,8 +93,8 @@ legend { display: contents; }
   left: -9999px;
   top: var(--space-md);
   z-index: 9999;
-  background: var(--osu-orange);
-  color: var(--text-on-orange);
+  background: var(--accent);
+  color: var(--text-on-dark);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -142,7 +145,7 @@ legend { display: contents; }
 
 .beta-modal__content h2 {
   margin: 0 0 1rem;
-  color: var(--osu-orange);
+  color: var(--accent);
   font-size: 1.5rem;
   line-height: 1.2;
 }
@@ -168,9 +171,9 @@ body.modal-open {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: var(--osu-black);
-  border-bottom: 3px solid var(--osu-orange);
-  padding: var(--space-sm) var(--space-xl);
+  background: var(--ink);
+  border-bottom: 3px solid var(--accent);
+  padding: 14px var(--space-xl);
 }
 .header-inner {
   max-width: 1200px;
@@ -185,23 +188,21 @@ body.modal-open {
   flex-direction: column;
   gap: 2px;
 }
-.header-org {
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--osu-orange);
-  opacity: 0.9;
-}
 .header-app {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
   color: var(--text-on-dark);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.06em;
+}
+.header-tagline {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--accent-soft);
 }
 .header-clock {
   font-size: 0.8rem;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255,255,255,0.55);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
   white-space: nowrap;
@@ -304,11 +305,11 @@ main { flex: 1; }
   background: var(--bg-context);
   border-radius: var(--radius-lg);
   padding: var(--space-lg) var(--space-xl);
-  border-left: 4px solid var(--osu-orange);
+  border-left: 4px solid var(--accent);
 }
 .assessment-context .section-legend {
-  color: var(--osu-orange);
-  border-bottom-color: rgba(254,92,0,0.4);
+  color: var(--accent-soft);
+  border-bottom-color: rgba(59,110,92,0.4);
 }
 .context-grid {
   display: grid;
@@ -330,11 +331,11 @@ main { flex: 1; }
 }
 .assessment-context select:focus,
 .assessment-context input:focus {
-  border-color: var(--osu-orange);
+  border-color: var(--accent);
   background: rgba(255,255,255,0.12);
 }
 .assessment-context select option { background: #222; color: #fff; }
-.assessment-context .required { color: var(--osu-orange); }
+.assessment-context .required { color: var(--accent); }
 .assessment-context .optional { color: rgba(255,255,255,0.4); }
 
 @media (max-width: 600px) {
@@ -379,7 +380,7 @@ main { flex: 1; }
 .checkbox-label input[type="checkbox"] {
   width: 16px;
   height: 16px;
-  accent-color: var(--osu-orange);
+  accent-color: var(--accent);
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -430,11 +431,11 @@ main { flex: 1; }
   transition: all 0.15s ease;
   min-height: 44px;
 }
-.hazard-tab:hover { border-color: var(--osu-orange); color: var(--text-primary); }
+.hazard-tab:hover { border-color: var(--accent); color: var(--text-primary); }
 .hazard-tab[aria-pressed="true"] {
-  background: var(--osu-orange);
-  border-color: var(--osu-orange);
-  color: var(--text-on-orange);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-dark);
 }
 .hazard-tab[data-mode="severe"][aria-pressed="true"] { background: var(--severe-color); border-color: var(--severe-color); }
 .hazard-tab[data-mode="heat"][aria-pressed="true"]   { background: var(--heat-color);   border-color: var(--heat-color); }
@@ -540,9 +541,9 @@ input:disabled {
   font-weight: 500;
 }
 .toggle-option:has(input:checked) {
-  background: var(--osu-orange);
-  border-color: var(--osu-orange);
-  color: var(--text-on-orange);
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-on-dark);
 }
 .toggle-option input[type="radio"] {
   position: absolute;
@@ -571,8 +572,8 @@ input:disabled {
   max-width: 640px;
 }
 .calculate-btn {
-  background: var(--osu-orange);
-  color: var(--text-on-orange);
+  background: var(--accent);
+  color: var(--text-on-dark);
   border: none;
   border-radius: var(--radius-md);
   padding: var(--space-md) var(--space-2xl);
@@ -582,7 +583,7 @@ input:disabled {
   min-height: 52px;
   transition: background 0.15s ease, transform 0.1s ease;
 }
-.calculate-btn:hover  { background: var(--osu-orange-dark); }
+.calculate-btn:hover  { background: #2D5647; }
 .calculate-btn:active { transform: scale(0.99); }
 @media (max-width: 600px) {
   .calculate-btn { width: 100%; }
@@ -600,11 +601,11 @@ input:disabled {
 
 /* Results header */
 .results-header {
-  background: var(--osu-black);
+  background: var(--ink);
   color: var(--text-on-dark);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding: var(--space-lg) var(--space-xl);
-  border-bottom: 3px solid var(--osu-orange);
+  border-bottom: 3px solid var(--accent);
 }
 .results-header-top {
   display: flex;
@@ -864,8 +865,8 @@ input:disabled {
   flex-wrap: wrap;
 }
 .btn-secondary {
-  background: var(--osu-orange);
-  color: var(--text-on-orange);
+  background: var(--accent);
+  color: var(--text-on-dark);
   border: none;
   border-radius: var(--radius-md);
   padding: var(--space-sm) var(--space-xl);
@@ -874,7 +875,7 @@ input:disabled {
   min-height: 44px;
   transition: background 0.15s ease;
 }
-.btn-secondary:hover { background: var(--osu-orange-dark); }
+.btn-secondary:hover { background: #2D5647; }
 .btn-ghost {
   background: none;
   color: var(--text-secondary);
@@ -890,7 +891,7 @@ input:disabled {
 
 /* ─── SITE FOOTER ─────────────────────────────────────────── */
 .site-footer {
-  background: var(--osu-black);
+  background: var(--ink);
   color: rgba(255,255,255,0.5);
   padding: var(--space-md) var(--space-xl);
   font-size: 0.75rem;
