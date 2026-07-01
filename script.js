@@ -52,14 +52,14 @@ function getRecommendation(level, category) {
       roads:    'No weather-based action needed. Continue standard monitoring.',
     },
     yellow: {
-      facility: 'Increase monitoring frequency. Notify decision makers. Begin contingency planning.',
-      outdoor:  'Increase monitoring frequency. Notify decision makers. Consider event modifications.',
-      roads:    'Increase monitoring frequency. Notify travel coordinators. Begin contingency planning.',
+      facility: 'Increase monitoring. Begin contingency planning.',
+      outdoor:  'Increase monitoring. Consider event modifications.',
+      roads:    'Increase monitoring. Begin contingency planning.',
     },
     amber: {
-      facility: 'Evaluate operational delays or modifications. Earlier decision points advised.',
-      outdoor:  'Evaluate delays, modifications, or contingency activation. Earlier decision points advised.',
-      roads:    'Evaluate travel restrictions or route modifications. Contingency activation advised.',
+      facility: 'Evaluate operational delays or modifications.',
+      outdoor:  'Evaluate delays, modifications, or contingency activation.',
+      roads:    'Evaluate travel restrictions or route modifications.',
     },
     red: {
       facility: 'Evaluate closure or emergency procedures. Immediate action may be required.',

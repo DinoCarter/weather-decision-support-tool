@@ -69,7 +69,7 @@
 
             <div class="field-group field-group--wide">
               <div class="forecast-window-hint" role="note">
-                <span>Defaulting to the next 12 hours from now. <strong>Update the forecast window if assessing a different time period.</strong></span>
+                <span>Forecast window defaults to the next 12 hours from now. <strong>Update the forecast window if assessing a different time period.</strong></span>
               </div>
             </div>
 
@@ -252,7 +252,7 @@
               <label class="toggle-option"><input type="radio" name="heat-source" value="wbgt" id="heat-source-wbgt" checked /> Use WBGT</label>
               <label class="toggle-option"><input type="radio" name="heat-source" value="hi"   id="heat-source-hi" /> Use Heat Index</label>
             </div>
-            <span class="field-hint">WBGT is preferred when available — it accounts for humidity, wind, and solar radiation.</span>
+            <span class="field-hint">WBGT is preferred when available.</span>
           </div>
 
           <div class="inputs-grid">
@@ -380,7 +380,7 @@
       <div id="results-content"></div>
 
       <p class="disclaimer">
-        <strong>Decision Support Only.</strong> This tool provides structured risk scores to inform human judgment. Scores do not constitute an official policy, emergency directive, or operational order. Final authority for all operational decisions rests with authorized leadership. Forecasts are subject to change — reassess as conditions evolve.
+        <strong>Decision Support Only.</strong> This tool provides structured risk scores to inform human judgment. Scores do not constitute an emergency directive, or operational order. Forecasts are subject to change. Reassess as conditions evolve.
       </p>
 
       <div class="results-actions">
@@ -403,8 +403,8 @@
       <h2 id="beta-modal-title">Beta Testing Notice</h2>
       <p>Kestrel is currently in beta testing and validation.</p>
       <p>The tool is under active development and should not be used as the sole basis for any operational decisions.</p>
-      <p>When using NWS API mode, weather data is pulled live from the National Weather Service. Always verify conditions with official NWS products and your agency's established protocols.</p>
-      <p>Kestrel is a decision-support aid only and does not constitute an official directive, policy determination, or operational order.</p>
+      <p>When using NWS API mode, weather data is pulled live from the National Weather Service. Always verify conditions. </p>
+      <p>Kestrel is a decision-support aid only.</p>
       <button type="button" id="beta-modal-close" class="calculate-btn">I Understand</button>
     </div>
   </div>
