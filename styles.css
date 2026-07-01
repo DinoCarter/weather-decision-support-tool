@@ -291,7 +291,7 @@ main { flex: 1; }
 }
 .context-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md) var(--space-xl);
 }
 .field-group--wide { grid-column: 1 / -1; }
@@ -316,7 +316,7 @@ main { flex: 1; }
 .assessment-context .optional { color: rgba(255,255,255,0.35); }
 
 @media (max-width: 600px) {
-  .context-grid { grid-template-columns: 1fr; }
+  .context-grid { grid-template-columns: minmax(0, 1fr); }
   .field-group--wide { grid-column: 1; }
   .assessment-context { padding: var(--space-md); }
 }
@@ -396,11 +396,11 @@ main { flex: 1; }
 .mode-badge { display: inline-block; margin-right: var(--space-xs); }
 .inputs-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md) var(--space-xl);
 }
 @media (max-width: 600px) {
-  .inputs-grid { grid-template-columns: 1fr; }
+  .inputs-grid { grid-template-columns: minmax(0, 1fr); }
   .hazard-inputs { padding: var(--space-md); }
 }
 .heat-source-toggle { margin-bottom: var(--space-md); }
