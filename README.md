@@ -79,11 +79,11 @@ Facility Operations = (100×15 + 100×15 + 100×5) / 100
 
 | Input | Facility Ops | Outdoor Activities | Roads & Travel |
 |---|---|---|---|
-| WBGT or Heat Index | 80 | 80 | 10 |
-| Sustained Wind | 20 | 20 | 10 |
-| **Total** | **100** | **100** | **100** |
+| WBGT or Heat Index | 55 | 80 | 30 |
+| Sustained Wind | 45 | 20 | 20 |
+| **Total** | **100** | **100** | **50** |
 
-**A note on the Roads & Travel heat score:** The remaining 80% of weight for Roads has no applicable input in heat mode. Heat just doesn't have a meaningful operational impact on road surfaces or travel safety the way ice does. So the Roads & Travel score in Heat mode will always be low (maximum theoretical score is 20/100).
+**A note on the Roads & Travel heat score:** Roads' weights only total 50%, not 100% — heat just doesn't have a meaningful operational impact on road surfaces or travel safety the way ice does, so the remaining 50% is intentionally left unassigned. The Roads & Travel score in Heat mode will always be capped well below Facility/Outdoor (maximum theoretical score is 50/100).
 
 ---
 
@@ -101,10 +101,10 @@ Facility Operations = (100×15 + 100×15 + 100×5) / 100
 
 | Input | Facility Ops | Outdoor Activities | Roads & Travel |
 |---|---|---|---|
-| Ice Accumulation | 40 | 20 | 40 |
+| Ice Accumulation | 35 | 20 | 40 |
 | Snow Accumulation | 20 | 20 | 20 |
 | Wind Chill | 15 | 45 | 5 |
-| Max Wind Gust | 15 | 10 | 15 |
+| Max Wind Gust | 20 | 10 | 15 |
 | Freeze-Thaw Cycle | 10 | 5 | 20 |
 | **Total** | **100** | **100** | **100** |
 

@@ -48,14 +48,14 @@ const WEIGHTS = {
     tornado:   { facility: 20, outdoor: 20, roads: 20 },
   },
   heat: {
-    heatStress: { facility: 80, outdoor: 80, roads: 10 },
-    windSust:   { facility: 20, outdoor: 20, roads: 10 },
+    heatStress: { facility: 55, outdoor: 80, roads: 30 },
+    windSust:   { facility: 45, outdoor: 20, roads: 20 },
   },
   winter: {
-    ice:        { facility: 40, outdoor: 20, roads: 40 },
+    ice:        { facility: 35, outdoor: 20, roads: 40 },
     snow:       { facility: 20, outdoor: 20, roads: 20 },
     windChill:  { facility: 15, outdoor: 45, roads:  5 },
-    windGust:   { facility: 15, outdoor: 10, roads: 15 },
+    windGust:   { facility: 20, outdoor: 10, roads: 15 },
     freezeThaw: { facility: 10, outdoor: 5,  roads: 20 },
   },
 };
