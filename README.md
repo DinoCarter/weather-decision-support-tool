@@ -101,11 +101,11 @@ Facility Operations = (100×15 + 100×15 + 100×5) / 100
 
 | Input | Facility Ops | Outdoor Activities | Roads & Travel |
 |---|---|---|---|
-| Ice Accumulation | 50 | 20 | 40 |
+| Ice Accumulation | 40 | 20 | 40 |
 | Snow Accumulation | 20 | 20 | 20 |
-| Wind Chill | 10 | 30 | 5 |
-| Max Wind Gust | 5 | 20 | 15 |
-| Freeze-Thaw Cycle | 15 | 10 | 20 |
+| Wind Chill | 15 | 45 | 5 |
+| Max Wind Gust | 15 | 10 | 15 |
+| Freeze-Thaw Cycle | 10 | 5 | 20 |
 | **Total** | **100** | **100** | **100** |
 
 ---

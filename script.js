@@ -36,11 +36,11 @@ const WEIGHTS = {
     windSust:   { facility: 20, outdoor: 20, roads: 10 },
   },
   winter: {
-    ice:        { facility: 50, outdoor: 20, roads: 40 },
+    ice:        { facility: 40, outdoor: 20, roads: 40 },
     snow:       { facility: 20, outdoor: 20, roads: 20 },
-    windChill:  { facility: 10, outdoor: 30, roads:  5 },
-    windGust:   { facility:  5, outdoor: 20, roads: 15 },
-    freezeThaw: { facility: 15, outdoor: 10, roads: 20 },
+    windChill:  { facility: 15, outdoor: 45, roads:  5 },
+    windGust:   { facility: 15, outdoor: 10, roads: 15 },
+    freezeThaw: { facility: 10, outdoor: 5,  roads: 20 },
   },
 };
 
