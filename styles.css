@@ -437,15 +437,18 @@ input[type="datetime-local"] {
   appearance: auto;
 }
 
-/* iOS Safari renders these widgets' internal segments at a fixed intrinsic
-   width and lets it bleed past the box instead of shrinking to fit, even
-   when the box itself is sized correctly (min-width:0 grid tracks etc.) */
+/* iOS Safari's native (-webkit-appearance:auto) chrome for these controls
+   can paint past the element's own box regardless of width/max-width/
+   overflow — turning off native appearance stops it from substituting that
+   oversized chrome; tapping still opens the native date/time picker. */
 input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
   min-width: 0;
   max-width: 100%;
   overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
 }
 @media (max-width: 480px) {
   input[type="date"],
