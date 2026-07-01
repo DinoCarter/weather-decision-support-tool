@@ -17,7 +17,14 @@
         <span class="header-app">KESTREL</span>
         <span class="header-tagline">Know before you go</span>
       </div>
-      <div class="header-clock" id="live-clock" aria-live="off" aria-label="Current date and time"></div>
+      <div class="header-right">
+        <div class="header-clock" id="live-clock" aria-live="off" aria-label="Current date and time"></div>
+        <button type="button" id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Dark mode">
+          <span class="theme-toggle-thumb" aria-hidden="true"></span>
+          <span class="theme-toggle-option theme-toggle-option--light" aria-hidden="true">Light</span>
+          <span class="theme-toggle-option theme-toggle-option--dark" aria-hidden="true">Dark</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -45,16 +52,26 @@
             <div class="field-group">
               <label for="location" class="field-label">Location <span class="required" aria-label="required">*</span></label>
               <select id="location" name="location" required aria-required="true">
-                <option value="okc">Oklahoma City</option>
                 <option value="stillwater" selected>Stillwater</option>
+                <option value="lakecarlblackwell">Lake Carl Blackwell</option>
                 <option value="tulsa">Tulsa</option>
                 <option value="tahlequah">Tahlequah</option>
                 <option value="okmulgee">Okmulgee</option>
+                <option value="okc">Oklahoma City</option>
+                <option value="custom">Custom coordinates…</option>
               </select>
             </div>
 
             <div class="field-group">
               <!-- spacer to keep grid aligned -->
+            </div>
+
+            <div class="field-group field-group--wide" id="custom-location-group" hidden>
+              <span class="field-label" id="custom-location-label">Custom Coordinates <span class="required" aria-label="required">*</span></span>
+              <div class="coord-split" role="group" aria-labelledby="custom-location-label">
+                <input type="number" id="custom-lat" name="custom-lat" step="any" min="-90" max="90" placeholder="Latitude" aria-label="Custom location latitude" />
+                <input type="number" id="custom-lon" name="custom-lon" step="any" min="-180" max="180" placeholder="Longitude" aria-label="Custom location longitude" />
+              </div>
             </div>
 
             <div class="field-group">

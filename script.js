@@ -10,12 +10,28 @@
    ═══════════════════════════════════════════════════════════ */
 
 const LOCATIONS = {
-  okc:        { name: 'Oklahoma City', lat: 35.4676, lon: -97.5164 },
-  stillwater: { name: 'Stillwater',    lat: 36.1156, lon: -97.0584 },
-  tulsa:      { name: 'Tulsa',         lat: 36.1540, lon: -95.9928 },
-  tahlequah:  { name: 'Tahlequah',     lat: 35.9154, lon: -94.9699 },
-  okmulgee:   { name: 'Okmulgee',      lat: 35.6237, lon: -96.0078 },
+  stillwater:         { name: 'Stillwater',            lat: 36.12581499621311,  lon: -97.06645384994434 },
+  lakecarlblackwell:  { name: 'Lake Carl Blackwell',    lat: 36.130491704733885, lon: -97.2081247868443  },
+  tulsa:              { name: 'Tulsa',                  lat: 36.13824970581936,  lon: -96.00554292132907 },
+  tahlequah:          { name: 'Tahlequah',              lat: 35.91002640860136,  lon: -94.95092187900713 },
+  okmulgee:           { name: 'Okmulgee',               lat: 35.62802890894432,  lon: -95.93902391148185 },
+  okc:                { name: 'Oklahoma City',          lat: 35.47068894814791,  lon: -97.58216723809198 },
 };
+
+/**
+ * Resolves a location select value to a { name, lat, lon } object.
+ * Handles the "custom" option by reading the custom lat/lon fields directly,
+ * since custom coordinates aren't present in LOCATIONS.
+ */
+function resolveLocation(locationKey) {
+  if (locationKey === 'custom') {
+    const lat = parseFloat(document.getElementById('custom-lat').value);
+    const lon = parseFloat(document.getElementById('custom-lon').value);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { name: `Custom (${lat.toFixed(4)}, ${lon.toFixed(4)})`, lat, lon };
+  }
+  return LOCATIONS[locationKey] || null;
+}
 
 /* ═══════════════════════════════════════════════════════════
    2. SCORING ENGINE
@@ -160,9 +176,7 @@ async function nwsFetch(url) {
   return res.json();
 }
 
-async function fetchNWSData(locationKey, windowStart, windowEnd) {
-  const loc = LOCATIONS[locationKey];
-
+async function fetchNWSData(loc, windowStart, windowEnd) {
   const pointsData = await nwsFetch(
     `https://api.weather.gov/points/${loc.lat},${loc.lon}`
   );
@@ -618,7 +632,7 @@ function renderNWSSection(nwsData, windowStart, windowEnd, activeModes, modeResu
 
 function renderResults(activeModes, modeResults, nwsData, windowStart, windowEnd) {
   const locationKey  = document.getElementById('location').value;
-  const locationName = LOCATIONS[locationKey]?.name || locationKey;
+  const locationName = resolveLocation(locationKey)?.name || locationKey;
   const assessor     = document.getElementById('assessor-name').value;
   const jobTitle     = document.getElementById('assessor-title').value;
   const isAPI        = nwsData != null;
@@ -674,7 +688,7 @@ function renderResults(activeModes, modeResults, nwsData, windowStart, windowEnd
   html += `
     <div class="condition-summary-wrapper">
       <button type="button" class="condition-summary-toggle" aria-expanded="false" aria-controls="condition-summary-body" id="condition-summary-btn">
-        <span>Condition Summary <span style="color:var(--text-hint);font-weight:400;font-size:0.8em;">(${allConditionItems.length} contributing factor${allConditionItems.length !== 1 ? 's' : ''})</span></span>
+        <span>Condition Summary <span style="color:var(--k-text-secondary);font-weight:400;font-size:0.8em;">(${allConditionItems.length} contributing factor${allConditionItems.length !== 1 ? 's' : ''})</span></span>
         <span class="condition-toggle-icon" aria-hidden="true">▾</span>
       </button>
       <div id="condition-summary-body" class="condition-summary-body" hidden>
@@ -721,6 +735,35 @@ function renderScoreCard({ key, label, score, note }, mode) {
    10. UI BEHAVIOR
    ═══════════════════════════════════════════════════════════ */
 
+const THEME_KEY = 'kestrel-theme';
+
+function getPreferredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'light' || stored === 'dark') return stored;
+  } catch (_) {}
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.setAttribute('aria-checked', String(theme === 'dark'));
+}
+
+// Applied immediately (outside DOMContentLoaded) so the page never flashes the wrong theme.
+applyTheme(getPreferredTheme());
+
+function initThemeToggle() {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (_) {}
+  });
+}
+
 const activeModes = new Set();
 let inputMode = 'api'; // 'api' | 'manual'
 
@@ -737,6 +780,14 @@ function toggleHazardMode(mode, btn) {
     const section = document.getElementById(`inputs-${mode}`);
     if (section) section.hidden = !activeModes.has(mode);
   }
+}
+
+function updateCustomLocationVisibility() {
+  const isCustom = document.getElementById('location').value === 'custom';
+  const group = document.getElementById('custom-location-group');
+  if (group) group.hidden = !isCustom;
+  document.getElementById('custom-lat').setAttribute('aria-required', String(isCustom));
+  document.getElementById('custom-lon').setAttribute('aria-required', String(isCustom));
 }
 
 function setInputMode(mode) {
@@ -793,6 +844,16 @@ function validate() {
   if (!name)     return 'Please enter the assessor\'s name.';
   if (!jobTitle) return 'Please enter the assessor\'s job title or role.';
   if (!location) return 'Please select a location.';
+  if (location === 'custom') {
+    const latRaw = document.getElementById('custom-lat').value;
+    const lonRaw = document.getElementById('custom-lon').value;
+    if (!latRaw || !lonRaw) return 'Please enter both a latitude and longitude for the custom location.';
+    const lat = parseFloat(latRaw);
+    const lon = parseFloat(lonRaw);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return 'Latitude and longitude must be valid numbers.';
+    if (lat < -90 || lat > 90)   return 'Latitude must be between -90 and 90.';
+    if (lon < -180 || lon > 180) return 'Longitude must be between -180 and 180.';
+  }
   if (!start || !end) return 'Please enter both a forecast start and end time.';
   if (new Date(start) >= new Date(end)) return 'Forecast end time must be after start time.';
   if (activeModes.size === 0) return 'Please select at least one hazard type.';
@@ -832,7 +893,9 @@ async function handleCalculate() {
   // API mode
   setLoading(true);
   try {
-    const nwsData = await fetchNWSData(locationKey, windowStart, windowEnd);
+    const loc = resolveLocation(locationKey);
+    if (!loc) throw new Error('Please select a valid location.');
+    const nwsData = await fetchNWSData(loc, windowStart, windowEnd);
     const modeResults = {};
     if (modesArray.includes('severe')) modeResults.severe = mapNWSToSevere(nwsData, windowStart, windowEnd);
     if (modesArray.includes('heat'))   modeResults.heat   = mapNWSToHeat(nwsData, windowStart, windowEnd);
@@ -860,6 +923,9 @@ function handleReset() {
   document.getElementById('assessor-name').value  = '';
   document.getElementById('assessor-title').value = '';
   document.getElementById('location').value = 'stillwater';
+  document.getElementById('custom-lat').value = '';
+  document.getElementById('custom-lon').value = '';
+  updateCustomLocationVisibility();
   setDefaultForecastWindow();
 
   activeModes.clear();
@@ -896,7 +962,7 @@ function handleExport() {
   const { modeResults, nwsData, modesArray, windowStart, windowEnd } = exp;
 
   const locationKey  = document.getElementById('location').value;
-  const locationName = LOCATIONS[locationKey]?.name || locationKey;
+  const locationName = resolveLocation(locationKey)?.name || locationKey;
   const assessor     = document.getElementById('assessor-name').value || '—';
   const jobTitle     = document.getElementById('assessor-title').value || '—';
   const calcTime     = formatDateTime(new Date());
@@ -975,43 +1041,52 @@ function handleExport() {
       </div>`;
   });
 
+  // Fixed to Kestrel's light/branded palette — this report renders in an isolated
+  // popup document, so it never sees the main page's [data-theme="dark"] and is
+  // unaffected by the user's dark mode preference regardless.
   const reportStyles = `
+    :root {
+      --k-bg: #F3F4F7; --k-surface: #FFFFFF; --k-border: #D3D8DE; --k-border-strong: #818A98;
+      --k-text: #131820; --k-text-secondary: #4F5764;
+      --k-primary: #2D658F; --k-primary-text: #FFFFFF; --k-accent: #AD531F; --k-accent-text: #FFFFFF;
+      --k-success-text: #235234; --k-warning-text: #8B610E; --k-danger-text: #7A261F; --k-info-text: #21759C;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 8pt; color: #000; background: #fff; padding: 0.45in 0.5in 0.4in; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 8pt; color: var(--k-text); background: var(--k-surface); padding: 0.45in 0.5in 0.4in; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     @page { size: letter portrait; margin: 0; }
-    .rpt-header { border-bottom: 3pt solid #C05B18; margin-bottom: 7pt; padding-bottom: 6pt; }
-    .rpt-header-title { font-size: 16pt; font-weight: 800; color: #14181C; letter-spacing: 0.06em; margin-bottom: 1pt; }
-    .rpt-header-tagline { font-size: 7.5pt; color: #C05B18; font-weight: 600; margin-bottom: 3pt; }
-    .rpt-header-sub { font-size: 7pt; color: #555; }
-    .rpt-infobar { display: flex; border: 1pt solid #ccc; border-left: 3pt solid #C05B18; margin-bottom: 7pt; background: #f8f8f8; }
-    .rpt-infobar-cell { flex: 1; padding: 4pt 7pt; border-right: 1pt solid #ddd; }
+    .rpt-header { border-bottom: 3pt solid var(--k-accent); margin-bottom: 7pt; padding-bottom: 6pt; }
+    .rpt-header-title { font-size: 16pt; font-weight: 800; color: var(--k-text); letter-spacing: 0.06em; margin-bottom: 1pt; }
+    .rpt-header-tagline { font-size: 7.5pt; color: var(--k-accent); font-weight: 600; margin-bottom: 3pt; }
+    .rpt-header-sub { font-size: 7pt; color: var(--k-text-secondary); }
+    .rpt-infobar { display: flex; border: 1pt solid var(--k-border); border-left: 3pt solid var(--k-accent); margin-bottom: 7pt; background: var(--k-bg); }
+    .rpt-infobar-cell { flex: 1; padding: 4pt 7pt; border-right: 1pt solid var(--k-border); }
     .rpt-infobar-cell:last-child { border-right: none; }
-    .rpt-info-label { font-size: 5.5pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #777; margin-bottom: 1.5pt; }
+    .rpt-info-label { font-size: 5.5pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--k-text-secondary); margin-bottom: 1.5pt; }
     .rpt-info-value { font-size: 7.5pt; font-weight: 600; }
-    .rpt-advisory-bar { display: flex; align-items: baseline; gap: 5pt; border: 1pt solid #999; border-left: 3pt solid #C05B18; background: #f0f0f0; padding: 3.5pt 7pt; margin-bottom: 7pt; flex-wrap: wrap; }
-    .rpt-advisory-label { font-size: 6pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #333; }
-    .rpt-advisory-pill { font-size: 6.5pt; font-weight: 600; background: #fff; border: 0.5pt solid #aaa; padding: 0.5pt 4pt; border-radius: 2pt; }
-    .rpt-mode-section { border: 1pt solid #ccc; margin-bottom: 6pt; page-break-inside: avoid; }
-    .rpt-mode-header { display: flex; align-items: center; justify-content: space-between; background: #14181C; color: #fff; padding: 3.5pt 8pt; }
+    .rpt-advisory-bar { display: flex; align-items: baseline; gap: 5pt; border: 1pt solid var(--k-border-strong); border-left: 3pt solid var(--k-accent); background: var(--k-bg); padding: 3.5pt 7pt; margin-bottom: 7pt; flex-wrap: wrap; }
+    .rpt-advisory-label { font-size: 6pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--k-text); }
+    .rpt-advisory-pill { font-size: 6.5pt; font-weight: 600; background: var(--k-surface); border: 0.5pt solid var(--k-border-strong); padding: 0.5pt 4pt; border-radius: 2pt; }
+    .rpt-mode-section { border: 1pt solid var(--k-border); margin-bottom: 6pt; page-break-inside: avoid; }
+    .rpt-mode-header { display: flex; align-items: center; justify-content: space-between; background: var(--k-text); color: var(--k-surface); padding: 3.5pt 8pt; }
     .rpt-mode-title { font-size: 7.5pt; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
     .rpt-mode-subtitle { font-size: 6pt; color: rgba(255,255,255,0.65); }
-    .rpt-nws-metrics { display: flex; gap: 12pt; padding: 3pt 8pt; background: #f5f5f5; border-bottom: 1pt solid #ddd; font-size: 6.5pt; font-weight: 600; flex-wrap: wrap; }
+    .rpt-nws-metrics { display: flex; gap: 12pt; padding: 3pt 8pt; background: var(--k-bg); border-bottom: 1pt solid var(--k-border); font-size: 6.5pt; font-weight: 600; flex-wrap: wrap; }
     .rpt-score-table { display: grid; grid-template-columns: repeat(3, 1fr); }
-    .rpt-score-cell { padding: 6pt 8pt; border-right: 1pt solid #e8e8e8; }
+    .rpt-score-cell { padding: 6pt 8pt; border-right: 1pt solid var(--k-border); }
     .rpt-score-cell:last-child { border-right: none; }
-    .rpt-score-cat { font-size: 6pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-bottom: 4pt; }
+    .rpt-score-cat { font-size: 6pt; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--k-text-secondary); margin-bottom: 4pt; }
     .rpt-score-level-row { display: flex; align-items: center; gap: 4pt; margin-bottom: 3pt; }
     .rpt-risk-bar { width: 3pt; height: 22pt; border-radius: 1pt; flex-shrink: 0; }
-    .rpt-risk-bar--green { background: #2E7D32; } .rpt-risk-bar--yellow { background: #c8900a; } .rpt-risk-bar--amber { background: #E65100; } .rpt-risk-bar--red { background: #B71C1C; }
+    .rpt-risk-bar--green { background: var(--k-success-text); } .rpt-risk-bar--yellow { background: var(--k-warning-text); } .rpt-risk-bar--amber { background: var(--k-accent); } .rpt-risk-bar--red { background: var(--k-danger-text); }
     .rpt-score-num-block { display: flex; flex-direction: column; }
     .rpt-score-num { font-size: 22pt; font-weight: 800; line-height: 1; }
-    .rpt-score-outof { font-size: 6pt; color: #888; }
+    .rpt-score-outof { font-size: 6pt; color: var(--k-text-secondary); }
     .rpt-score-status { font-size: 7.5pt; font-weight: 700; margin-bottom: 3pt; }
-    .rpt-score-rec { font-size: 6.5pt; color: #333; line-height: 1.4; border-top: 0.5pt solid #e0e0e0; padding-top: 3pt; }
-    .rpt-subdued-note { font-size: 5.5pt; font-style: italic; color: #999; margin-top: 2pt; }
-    .rpt-footer { margin-top: 6pt; padding-top: 5pt; border-top: 0.5pt solid #ccc; display: flex; justify-content: space-between; gap: 12pt; }
-    .rpt-disclaimer { font-size: 5.5pt; color: #666; line-height: 1.45; flex: 1; }
-    .rpt-footer-right { font-size: 5.5pt; color: #999; text-align: right; white-space: nowrap; }
+    .rpt-score-rec { font-size: 6.5pt; color: var(--k-text); line-height: 1.4; border-top: 0.5pt solid var(--k-border); padding-top: 3pt; }
+    .rpt-subdued-note { font-size: 5.5pt; font-style: italic; color: var(--k-text-secondary); margin-top: 2pt; }
+    .rpt-footer { margin-top: 6pt; padding-top: 5pt; border-top: 0.5pt solid var(--k-border); display: flex; justify-content: space-between; gap: 12pt; }
+    .rpt-disclaimer { font-size: 5.5pt; color: var(--k-text-secondary); line-height: 1.45; flex: 1; }
+    .rpt-footer-right { font-size: 5.5pt; color: var(--k-text-secondary); text-align: right; white-space: nowrap; }
   `;
 
   const fullHTML = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"/><title>Kestrel — ${locationName}</title><style>${reportStyles}</style></head><body>
@@ -1126,9 +1201,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => toggleHazardMode(btn.dataset.mode, btn));
   });
 
+  document.getElementById('location').addEventListener('change', updateCustomLocationVisibility);
+  updateCustomLocationVisibility();
+
   initHeatSourceToggle();
   initDataSourcesPanel();
   initBetaModal();
+  initThemeToggle();
 
   const calcBtn = document.getElementById('calculate-btn');
   if (calcBtn) calcBtn.addEventListener('click', handleCalculate);
